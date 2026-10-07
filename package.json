@@ -1,0 +1,38 @@
+{
+  "name": "finance",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Finance \u2014 personal finance manager backed by the user's own Google Spreadsheet",
+  "packageManager": "pnpm@10.27.0",
+  "engines": {
+    "node": "^20.19.0 || ^22.12.0 || >=23.11.0",
+    "pnpm": ">=10"
+  },
+  "scripts": {
+    "postinstall": "pnpm --filter @finance/shared build",
+    "dev": "pnpm -r --parallel run dev",
+    "dev:api": "pnpm --filter @finance/api dev",
+    "dev:mobile": "pnpm --filter @finance/mobile start",
+    "web": "pnpm --filter @finance/mobile web",
+    "android": "pnpm --filter @finance/mobile android",
+    "build:shared": "pnpm --filter @finance/shared build",
+    "build:api": "pnpm --filter @finance/api build",
+    "build:web": "pnpm --filter @finance/mobile build:web",
+    "typecheck": "pnpm -r run typecheck",
+    "lint": "pnpm -r run lint",
+    "test": "pnpm -r run test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "prettier": "^3.9.9",
+    "typescript": "~6.0.3"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@parcel/watcher",
+      "esbuild",
+      "unrs-resolver"
+    ]
+  }
+}

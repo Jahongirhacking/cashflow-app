@@ -1,0 +1,37 @@
+{
+  "name": "@finance/shared",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Domain model, validation schemas and utilities shared by the Finance API and client",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint .",
+    "test": "node --test --import tsx tests/**/*.test.ts"
+  },
+  "dependencies": {
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.0",
+    "@finance/config": "workspace:*",
+    "@types/node": "^24.0.0",
+    "eslint": "^9.39.5",
+    "tsx": "^4.20.0",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.71.0"
+  }
+}

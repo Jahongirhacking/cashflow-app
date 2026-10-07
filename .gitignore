@@ -1,0 +1,42 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+build/
+web-build/
+*.tsbuildinfo
+
+# env — never commit real secrets
+.env
+.env.*
+!.env.example
+
+# local data (dev-only user registry, logs)
+apps/api/data/
+*.log
+
+# expo
+.expo/
+expo-env.d.ts
+.metro-health-check*
+apps/mobile/android/
+apps/mobile/dist-test/
+apps/mobile/ios/
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.pem
+
+# editors / os
+.idea/
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+
+# tests
+coverage/

@@ -1,0 +1,9 @@
+{
+  "extends": "@finance/config/tsconfig/node.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "types": []
+  },
+  "include": ["src"]
+}
