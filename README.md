@@ -66,9 +66,16 @@ Only the `openid email profile` scopes are requested. Web sessions use an HTTP-o
 one-time code on the `finance://auth/callback` deep link and exchanges it for a bearer token stored in the
 device keystore.
 
-**Service account (spreadsheet access, Phase 3).** Create a service account, enable the Google Sheets API, download
-its JSON key and set `GOOGLE_SERVICE_ACCOUNT_EMAIL` / `GOOGLE_PRIVATE_KEY`. Users share their spreadsheet with
-that email (Editor) during the in-app setup wizard.
+**Service account (spreadsheet access, Phase 3).**
+
+1. In the same Cloud project, **enable the Google Sheets API** (APIs & Services → Library → Google Sheets API →
+   Enable). Without this every request fails with a 403 even when the sheet is shared.
+2. Create a service account, download its JSON key and set `GOOGLE_SERVICE_ACCOUNT_EMAIL` / `GOOGLE_PRIVATE_KEY`.
+3. Users share their spreadsheet with that email (Editor) in the in-app setup wizard. Service accounts need no
+   invitation acceptance; access is immediate.
+
+Troubleshoot with `pnpm --filter @finance/api check:sheets <spreadsheet-url>`: it verifies the key, whether the
+Sheets API is enabled, and whether the sheet is readable.
 
 **No Google credentials yet?** Set `SHEETS_BACKEND=memory` in `apps/api/.env`. The API then serves a seeded
 in-memory demo spreadsheet (legacy Uzbek layout); connect it in the wizard with

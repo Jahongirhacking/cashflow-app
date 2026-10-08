@@ -9,7 +9,7 @@ import {
   type SpreadsheetMeta,
   type ValueUpdate,
 } from './sheets-client';
-import { isRetryableGoogleError, mapGoogleError } from './sheets-errors';
+import { describeGoogleError, isRetryableGoogleError, mapGoogleError } from './sheets-errors';
 
 const BASE_URL = 'https://sheets.googleapis.com/v4/spreadsheets';
 const SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
@@ -191,6 +191,7 @@ export class GoogleSheetsClient extends SheetsClient {
           await new Promise((resolve) => setTimeout(resolve, delay));
           continue;
         }
+        this.logger.warn(describeGoogleError(error));
         throw mapGoogleError(error);
       }
     }

@@ -308,9 +308,21 @@ function VerifyStep({
     const accessProblem =
       error instanceof ApiError &&
       (error.code === 'SPREADSHEET_ACCESS_DENIED' || error.code === 'SPREADSHEET_NOT_FOUND');
+    const serverConfigProblem = error instanceof ApiError && error.code === 'CONFIGURATION_ERROR';
     return (
-      <StepCard title="Unable to access your spreadsheet">
-        {accessProblem ? (
+      <StepCard
+        title={
+          serverConfigProblem
+            ? 'Server is not fully configured'
+            : 'Unable to access your spreadsheet'
+        }
+      >
+        {serverConfigProblem ? (
+          // Server configuration messages are written for people; show them as-is.
+          <Text color="expense" accessibilityRole="alert">
+            {error.message}
+          </Text>
+        ) : accessProblem ? (
           <>
             <Text color="textSecondary">Make sure that:</Text>
             {[

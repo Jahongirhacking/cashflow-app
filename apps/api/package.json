@@ -2,7 +2,7 @@
   "name": "@finance/api",
   "version": "0.1.0",
   "private": true,
-  "description": "Finance REST API — NestJS backend that talks to the user's Google Spreadsheet",
+  "description": "Finance REST API \u2014 NestJS backend that talks to the user's Google Spreadsheet",
   "main": "dist/main.js",
   "scripts": {
     "build": "nest build",
@@ -13,7 +13,8 @@
     "lint": "eslint .",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch",
-    "test:e2e": "NODE_OPTIONS=--experimental-vm-modules jest --config ./test/jest-e2e.config.cjs"
+    "test:e2e": "NODE_OPTIONS=--experimental-vm-modules jest --config ./test/jest-e2e.config.cjs",
+    "check:sheets": "node scripts/check-sheets.mjs"
   },
   "dependencies": {
     "@finance/shared": "workspace:*",

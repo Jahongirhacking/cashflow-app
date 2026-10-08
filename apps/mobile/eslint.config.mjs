@@ -2,7 +2,17 @@ import expoConfig from 'eslint-config-expo/flat.js';
 import tseslint from 'typescript-eslint';
 
 export default [
-  { ignores: ['dist/**', 'dist-test/**', 'node_modules/**', '.expo/**', 'android/**', 'ios/**', 'expo-env.d.ts'] },
+  {
+    ignores: [
+      'dist/**',
+      'dist-test/**',
+      'node_modules/**',
+      '.expo/**',
+      'android/**',
+      'ios/**',
+      'expo-env.d.ts',
+    ],
+  },
   ...expoConfig,
   ...tseslint.configs.recommendedTypeChecked.map((config) => ({
     ...config,
