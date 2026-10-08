@@ -1,7 +1,3 @@
-import * as Linking from 'expo-linking';
-import { useRouter } from 'expo-router';
-import { ExternalLink, RefreshCw } from 'lucide-react-native';
-import { StyleSheet, View } from 'react-native';
 import { useToast } from '@/components/feedback/ToastProvider';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -10,6 +6,10 @@ import { Text } from '@/components/ui/Text';
 import { useSpreadsheetStatus, useVerifySpreadsheet } from '@/features/spreadsheet/api';
 import { useSpreadsheetAccess } from '@/features/spreadsheet/SpreadsheetAccessProvider';
 import { useTheme } from '@/theme';
+import * as Linking from 'expo-linking';
+import { useRouter } from 'expo-router';
+import { ExternalLink, RefreshCw } from 'lucide-react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 
 function formatDateTime(iso: string | null): string {
   if (!iso) return 'Never';
@@ -38,6 +38,18 @@ export function SpreadsheetSettingsCard() {
           : 'Not connected';
   const stateColor =
     state === 'OK' ? 'income' : state === 'NOT_CONNECTED' ? 'textSecondary' : 'expense';
+
+  const openSpreadsheet = () => {
+    const url = data?.spreadsheetUrl;
+
+    if (!url) return;
+
+    if (Platform.OS === 'web') {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } else {
+      void Linking.openURL(url);
+    }
+  };
 
   const onVerify = () =>
     verify.mutate(undefined, {
@@ -88,7 +100,7 @@ export function SpreadsheetSettingsCard() {
           size="sm"
           icon={ExternalLink}
           disabled={!data?.spreadsheetUrl}
-          onPress={() => data?.spreadsheetUrl && void Linking.openURL(data.spreadsheetUrl)}
+          onPress={openSpreadsheet}
         />
         <Button
           title="Reconnect Spreadsheet"
