@@ -108,7 +108,7 @@ describe('Spreadsheets & transactions (e2e, in-memory Sheets)', () => {
       .expect(403);
     expect(denied.body).toMatchObject({
       code: 'SPREADSHEET_ACCESS_DENIED',
-      message: 'The Finance app cannot access this spreadsheet.',
+      message: 'The My Cashify app cannot access this spreadsheet.',
     });
     sheets.setAccessDenied(SHEET_ID, false);
   });

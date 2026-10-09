@@ -1,0 +1,33 @@
+# Local production-like run of the API container.
+#   docker compose up --build        # http://localhost:3000/health
+#   docker compose logs -f api
+# Configuration comes from apps/api/.env (copy apps/api/.env.example). No database service: the app's data
+# store is the user's Google Spreadsheet; users are kept in the registry spreadsheet (GOOGLE_SPREADSHEET_ID)
+# or, when that is empty, in a JSON file on the `api-data` volume.
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: my-cashify-api:local
+    env_file:
+      - path: apps/api/.env
+        required: false
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATA_DIR: /data
+    ports:
+      - '3000:3000'
+    volumes:
+      - api-data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://127.0.0.1:3000/health']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  api-data:

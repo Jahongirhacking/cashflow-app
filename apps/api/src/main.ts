@@ -28,7 +28,8 @@ async function bootstrap(): Promise<void> {
   app.useGlobalFilters(new HttpExceptionFilter());
   app.enableShutdownHooks();
 
-  await app.listen(config.port);
+  // Bind every interface: containers (Docker, Northflank) route traffic to the pod IP, not loopback.
+  await app.listen(config.port, '0.0.0.0');
   Logger.log(`My Cashify API listening on ${await app.getUrl()} (${config.nodeEnv})`, 'Bootstrap');
 }
 

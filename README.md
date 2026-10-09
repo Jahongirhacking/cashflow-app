@@ -146,6 +146,10 @@ packages/shared/src
   domain/        models + Zod schemas     api/  error envelope, health     utils/  money, date, id
 ```
 
+## Deployment
+
+See [DEPLOY.md](DEPLOY.md): Dockerfile + compose for the API, environment reference, and Northflank steps.
+
 ## Production web build
 
 `EXPO_PUBLIC_API_URL` is inlined at export time, so set it to the public API origin before

@@ -1,0 +1,33 @@
+# Only the API is containerised; keep the context small and secret-free.
+.git
+.github
+node_modules
+**/node_modules
+**/dist
+**/dist-test
+**/dist-harness
+**/coverage
+**/.expo
+**/.turbo
+*.log
+
+# never bake secrets or local data into the image
+.env
+.env.*
+!.env.example
+apps/api/.env
+apps/api/.env.*
+!apps/api/.env.example
+apps/api/data
+
+# the web/android app is built and hosted separately (only its manifest is needed for the workspace)
+apps/mobile/*
+!apps/mobile/package.json
+
+# docs, editor and harness files
+docs
+*.md
+!README.md
+.vscode
+.idea
+.claude
