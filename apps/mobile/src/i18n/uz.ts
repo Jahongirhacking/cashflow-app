@@ -2,7 +2,7 @@ import type { TranslationKey } from './en';
 
 /** O'zbekcha (lotin). Every key from en.ts must exist here; the type below enforces it. */
 export const uz: Record<TranslationKey, string> = {
-  'common.appName': 'Finance',
+  'common.appName': 'My Cashify',
   'common.cancel': 'Bekor qilish',
   'common.save': 'Saqlash',
   'common.delete': "O'chirish",
@@ -84,7 +84,7 @@ export const uz: Record<TranslationKey, string> = {
   'auth.error.google_error': 'Google orqali kirish amalga oshmadi. Qayta urinib ko‘ring.',
   'auth.error.server_error': 'Bizning tomonda xatolik yuz berdi. Qayta urinib ko‘ring.',
   'auth.error.not_configured': 'Serverda Google orqali kirish hali sozlanmagan.',
-  'auth.cannotReach.title': "Finance bilan bog'lanib bo'lmadi",
+  'auth.cannotReach.title': "My Cashify bilan bog'lanib bo'lmadi",
   'auth.cannotReach.body':
     "Sessiyani tekshira olmadik. API ishlayotganiga ishonch hosil qilib, qayta urinib ko'ring.",
 
@@ -122,7 +122,7 @@ export const uz: Record<TranslationKey, string> = {
   'setup.stepOf': '{total} dan {step}-qadam',
   'setup.create.title': 'Google jadvalingizni yarating',
   'setup.create.body':
-    "Finance moliyaviy ma'lumotlaringizni o'z Google jadvalingizda saqlaydi. Yangi jadval yarating yoki tranzaksiyalaringiz yozilgan mavjud jadvaldan foydalaning — mavjud qatorlar o'zgarmaydi.",
+    "My Cashify moliyaviy ma'lumotlaringizni o'z Google jadvalingizda saqlaydi. Yangi jadval yarating yoki tranzaksiyalaringiz yozilgan mavjud jadvaldan foydalaning — mavjud qatorlar o'zgarmaydi.",
   'setup.create.open': 'Google Sheets’ni ochish',
   'setup.create.next': 'Jadvalni yaratdim',
   'setup.share.title': 'Jadvalni ulashing',
@@ -133,7 +133,7 @@ export const uz: Record<TranslationKey, string> = {
   'setup.share.copied': 'E-pochta nusxalandi',
   'setup.share.step1': 'Jadvalingizni oching.',
   'setup.share.step2': 'Share (Ulashish) tugmasini bosing.',
-  'setup.share.step3': 'Finance xizmat hisobi e-pochtasini qo‘shing.',
+  'setup.share.step3': 'My Cashify xizmat hisobi e-pochtasini qo‘shing.',
   'setup.share.step4': 'Editor (Muharrir) ni tanlang.',
   'setup.share.step5': 'Send (Yuborish) ni bosing.',
   'setup.share.next': 'Ulashdim',
@@ -143,7 +143,7 @@ export const uz: Record<TranslationKey, string> = {
   'setup.connect.invalid': 'Bu Google Sheets havolasi emas',
   'setup.connect.required': 'Jadval havolasini joylashtiring',
   'setup.verify.title': 'Kirish tekshirilmoqda',
-  'setup.verify.checking': "Finance jadvalingizni o'qiy olishi tekshirilmoqda",
+  'setup.verify.checking': "My Cashify jadvalingizni o'qiy olishi tekshirilmoqda",
   'setup.verify.errorTitle': "Jadvalingizga kirib bo'lmadi",
   'setup.verify.serverTitle': "Server to'liq sozlanmagan",
   'setup.verify.makeSure': 'Quyidagilarni tekshiring:',
@@ -169,19 +169,19 @@ export const uz: Record<TranslationKey, string> = {
   'sheet.verify': 'Ulanishni tekshirish',
   'sheet.verified': 'Ulanish tasdiqlandi',
   'sheet.verifyFailed':
-    "Finance jadvalga kira olmaydi. Muharrir huquqini qayta bering va urinib ko'ring.",
+    "My Cashify jadvalga kira olmaydi. Muharrir huquqini qayta bering va urinib ko'ring.",
   'sheet.verifyError': "Ulanishni tekshirib bo'lmadi. Qayta urinib ko'ring.",
   'sheet.lost.title': "Jadvalga kirish yo'qoldi",
   'sheet.lost.heading': 'Muharrir huquqini qayta bering',
   'sheet.lost.body':
-    "Finance endi {name} ni o'qiy olmaydi. Uni {email} bilan qayta ulashib, Muharrir huquqini bering yoki boshqa jadvalni ulang.",
+    "My Cashify endi {name} ni o'qiy olmaydi. Uni {email} bilan qayta ulashib, Muharrir huquqini bering yoki boshqa jadvalni ulang.",
   'sheet.lost.restored': 'Jadvalga kirish tiklandi',
   'sheet.lost.still':
     "Hali ham kirish yo'q. Ulashish sozlamalarini tekshirib, qayta urinib ko'ring.",
   'sheet.lost.reconnect': 'Qayta ulash',
   'sheet.lost.openSettings': 'Sozlamalarni ochish',
   'sheet.lost.yourSpreadsheet': 'jadvalingiz',
-  'sheet.lost.serviceAccount': 'Finance xizmat hisobi',
+  'sheet.lost.serviceAccount': 'My Cashify xizmat hisobi',
 
   'dashboard.hi': 'Salom, {name}',
   'dashboard.title': 'Bosh sahifa',

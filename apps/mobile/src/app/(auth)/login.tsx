@@ -1,6 +1,7 @@
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Image, Pressable, StyleSheet, View } from 'react-native';
+import appIcon from '../../../assets/icon.png';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Card } from '@/components/ui/Card';
 import { GoogleLogo } from '@/components/ui/GoogleLogo';
@@ -39,18 +40,13 @@ export default function LoginScreen() {
       ]}
     >
       <Card padding="lg" style={styles.card}>
-        <View
-          style={[
-            styles.logo,
-            { backgroundColor: theme.colors.primary, borderRadius: theme.radii.md },
-          ]}
-        >
-          <Text variant="title" color="onPrimary">
-            F
-          </Text>
-        </View>
+        <Image
+          source={appIcon}
+          style={[styles.logo, { borderRadius: theme.radii.md }]}
+          accessibilityIgnoresInvertColors
+        />
         <Text variant="title" align="center" style={{ marginTop: theme.spacing.lg }}>
-          Finance
+          {t('common.appName')}
         </Text>
         <Text
           variant="body"

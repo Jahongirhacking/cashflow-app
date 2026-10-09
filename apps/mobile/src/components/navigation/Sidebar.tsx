@@ -1,6 +1,7 @@
 import { Link, usePathname } from 'expo-router';
 import { Moon, Sun, SunMoon } from 'lucide-react-native';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Image, Pressable, StyleSheet, View } from 'react-native';
+import appIcon from '../../../assets/icon.png';
 import { Avatar } from '@/components/ui/Avatar';
 import { Text } from '@/components/ui/Text';
 import { useAuth } from '@/features/auth/AuthProvider';
@@ -16,6 +17,7 @@ function isActive(pathname: string, href: string): boolean {
 
 export function Sidebar() {
   const theme = useTheme();
+  const t = useT();
   const pathname = usePathname();
 
   return (
@@ -31,17 +33,12 @@ export function Sidebar() {
       accessibilityRole="menu"
     >
       <View style={[styles.brand, { paddingHorizontal: theme.spacing.lg }]}>
-        <View
-          style={[
-            styles.logo,
-            { backgroundColor: theme.colors.primary, borderRadius: theme.radii.sm },
-          ]}
-        >
-          <Text variant="bodyStrong" color="onPrimary">
-            F
-          </Text>
-        </View>
-        <Text variant="heading">Finance</Text>
+        <Image
+          source={appIcon}
+          style={[styles.logo, { borderRadius: theme.radii.sm }]}
+          accessibilityIgnoresInvertColors
+        />
+        <Text variant="heading">{t('common.appName')}</Text>
       </View>
 
       <View style={[styles.nav, { paddingHorizontal: theme.spacing.sm }]}>

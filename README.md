@@ -1,4 +1,4 @@
-# Finance
+# My Cashify
 
 Personal finance manager for Web and Android that turns your own Google Spreadsheet into a modern
 financial dashboard. One TypeScript monorepo: an Expo client, a NestJS API and a shared domain package.
@@ -145,6 +145,14 @@ apps/mobile/src
 packages/shared/src
   domain/        models + Zod schemas     api/  error envelope, health     utils/  money, date, id
 ```
+
+## Production web build
+
+`EXPO_PUBLIC_API_URL` is inlined at export time, so set it to the public API origin before
+`npx expo export --platform web` (for example `EXPO_PUBLIC_API_URL=https://api.example.com`). A relative path such
+as `/api` is resolved against the site's origin; a bare host gets `https://`. An invalid value no longer crashes the
+page at startup: the app logs the problem and shows the "can't reach the server" screen instead. The API must allow
+the web origin (`APP_WEB_URL`) and set the session cookie for cross-site use when the two are on different hosts.
 
 ## Status
 

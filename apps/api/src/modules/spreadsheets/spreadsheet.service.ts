@@ -273,7 +273,7 @@ export class SpreadsheetService {
         [[...APP_BLOCK_HEADERS]],
       );
       this.logger.log(
-        `Added Finance columns at ${columnLetter(appColumn)} in sheet "${title}" of ${spreadsheetId}`,
+        `Added My Cashify columns at ${columnLetter(appColumn)} in sheet "${title}" of ${spreadsheetId}`,
       );
     }
     if (format === 'app' && rows.length === 0) {

@@ -1,6 +1,7 @@
 import { AppException } from '../../common/errors/app.exception';
 
-export const SPREADSHEET_ACCESS_DENIED_MESSAGE = 'The Finance app cannot access this spreadsheet.';
+export const SPREADSHEET_ACCESS_DENIED_MESSAGE =
+  'The My Cashify app cannot access this spreadsheet.';
 export const SPREADSHEET_NOT_FOUND_MESSAGE = 'This spreadsheet could not be found.';
 
 interface GoogleErrorDetail {
@@ -19,7 +20,7 @@ interface GoogleErrorLike {
 }
 
 export const SHEETS_API_DISABLED_MESSAGE =
-  'The Google Sheets API is not enabled for the Finance service-account project. Enable it in Google Cloud Console, wait a minute and retry.';
+  'The Google Sheets API is not enabled for the My Cashify service-account project. Enable it in Google Cloud Console, wait a minute and retry.';
 
 export function googleErrorStatus(error: unknown): number | null {
   const e = error as GoogleErrorLike;

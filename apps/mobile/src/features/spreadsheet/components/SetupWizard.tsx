@@ -203,7 +203,7 @@ function ShareStep({
         {[
           'Open your spreadsheet.',
           'Click Share.',
-          'Add the Finance service-account email.',
+          'Add the My Cashify service-account email.',
           'Select Editor.',
           'Click Send.',
         ].map((line, i) => (

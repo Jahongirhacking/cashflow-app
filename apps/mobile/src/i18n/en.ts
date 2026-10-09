@@ -1,7 +1,7 @@
 /** English strings. Keys are the contract; uz.ts must provide every key. `{name}` placeholders are interpolated. */
 export const en = {
   // common
-  'common.appName': 'Finance',
+  'common.appName': 'My Cashify',
   'common.cancel': 'Cancel',
   'common.save': 'Save changes',
   'common.delete': 'Delete',
@@ -87,7 +87,7 @@ export const en = {
   'auth.error.google_error': 'Google sign-in failed. Please try again.',
   'auth.error.server_error': 'Something went wrong on our side. Please try again.',
   'auth.error.not_configured': 'Google sign-in is not configured on the server yet.',
-  'auth.cannotReach.title': "Can't reach Finance",
+  'auth.cannotReach.title': "Can't reach My Cashify",
   'auth.cannotReach.body':
     "We couldn't check your session. Make sure the API is running and try again.",
 
@@ -126,7 +126,7 @@ export const en = {
   'setup.stepOf': 'Step {step} of {total}',
   'setup.create.title': 'Create your Google Spreadsheet',
   'setup.create.body':
-    'Finance stores your financial data in your own Google Spreadsheet. Create a new one, or use the spreadsheet where you already track transactions — existing rows are kept as they are.',
+    'My Cashify stores your financial data in your own Google Spreadsheet. Create a new one, or use the spreadsheet where you already track transactions — existing rows are kept as they are.',
   'setup.create.open': 'Open Google Sheets',
   'setup.create.next': "I've created my spreadsheet",
   'setup.share.title': 'Share your spreadsheet',
@@ -136,7 +136,7 @@ export const en = {
   'setup.share.copied': 'Email copied',
   'setup.share.step1': 'Open your spreadsheet.',
   'setup.share.step2': 'Click Share.',
-  'setup.share.step3': 'Add the Finance service-account email.',
+  'setup.share.step3': 'Add the My Cashify service-account email.',
   'setup.share.step4': 'Select Editor.',
   'setup.share.step5': 'Click Send.',
   'setup.share.next': "I've shared it",
@@ -146,7 +146,7 @@ export const en = {
   'setup.connect.invalid': 'This is not a valid Google Sheets URL',
   'setup.connect.required': 'Paste your spreadsheet URL',
   'setup.verify.title': 'Verifying access',
-  'setup.verify.checking': 'Checking that Finance can read your spreadsheet',
+  'setup.verify.checking': 'Checking that My Cashify can read your spreadsheet',
   'setup.verify.errorTitle': 'Unable to access your spreadsheet',
   'setup.verify.serverTitle': 'Server is not fully configured',
   'setup.verify.makeSure': 'Make sure that:',
@@ -173,18 +173,18 @@ export const en = {
   'sheet.verify': 'Verify Connection',
   'sheet.verified': 'Connection verified',
   'sheet.verifyFailed':
-    'Finance cannot access the spreadsheet. Restore Editor access and try again.',
+    'My Cashify cannot access the spreadsheet. Restore Editor access and try again.',
   'sheet.verifyError': 'Could not verify the connection. Please try again.',
   'sheet.lost.title': 'Spreadsheet access lost',
   'sheet.lost.heading': 'Please restore Editor access',
   'sheet.lost.body':
-    'Finance can no longer read {name}. Share it again with {email} and give it Editor access, or connect a different spreadsheet.',
+    'My Cashify can no longer read {name}. Share it again with {email} and give it Editor access, or connect a different spreadsheet.',
   'sheet.lost.restored': 'Spreadsheet access restored',
   'sheet.lost.still': 'Still no access. Check the sharing settings and try again.',
   'sheet.lost.reconnect': 'Reconnect',
   'sheet.lost.openSettings': 'Open Settings',
   'sheet.lost.yourSpreadsheet': 'your spreadsheet',
-  'sheet.lost.serviceAccount': 'the Finance service account',
+  'sheet.lost.serviceAccount': 'the My Cashify service account',
 
   // dashboard
   'dashboard.hi': 'Hi, {name}',

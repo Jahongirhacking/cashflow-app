@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Finance",
-    "slug": "finance",
+    "name": "My Cashify",
+    "slug": "my-cashify",
     "version": "0.1.0",
     "scheme": "finance",
     "orientation": "portrait",
@@ -12,7 +12,7 @@
       "package": "uz.finance.app",
       "adaptiveIcon": {
         "backgroundColor": "#0B0F14",
-        "foregroundImage": "./assets/android-icon-foreground.png",
+        "foregroundImage": "./assets/icon.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
@@ -23,8 +23,8 @@
       "bundler": "metro",
       "output": "single",
       "favicon": "./assets/favicon.png",
-      "name": "Finance",
-      "shortName": "Finance",
+      "name": "My Cashify",
+      "shortName": "Cashify",
       "themeColor": "#0B0F14",
       "backgroundColor": "#0B0F14"
     },

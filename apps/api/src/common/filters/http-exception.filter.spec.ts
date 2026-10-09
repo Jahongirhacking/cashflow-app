@@ -23,7 +23,7 @@ describe('HttpExceptionFilter', () => {
     filter.catch(
       new AppException(
         'SPREADSHEET_ACCESS_DENIED',
-        'The Finance app cannot access this spreadsheet.',
+        'The My Cashify app cannot access this spreadsheet.',
       ),
       host,
     );
@@ -31,7 +31,7 @@ describe('HttpExceptionFilter', () => {
     expect(json).toHaveBeenCalledWith({
       statusCode: 403,
       code: 'SPREADSHEET_ACCESS_DENIED',
-      message: 'The Finance app cannot access this spreadsheet.',
+      message: 'The My Cashify app cannot access this spreadsheet.',
     });
   });
 

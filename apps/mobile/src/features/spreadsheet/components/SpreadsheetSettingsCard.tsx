@@ -61,7 +61,7 @@ export function SpreadsheetSettingsCard() {
           toast.success(t('sheet.verified'));
         } else {
           toast.error(
-            'Finance cannot access the spreadsheet. Restore Editor access and try again.',
+            'My Cashify cannot access the spreadsheet. Restore Editor access and try again.',
           );
         }
       },

@@ -29,7 +29,7 @@ async function bootstrap(): Promise<void> {
   app.enableShutdownHooks();
 
   await app.listen(config.port);
-  Logger.log(`Finance API listening on ${await app.getUrl()} (${config.nodeEnv})`, 'Bootstrap');
+  Logger.log(`My Cashify API listening on ${await app.getUrl()} (${config.nodeEnv})`, 'Bootstrap');
 }
 
 bootstrap().catch((error: unknown) => {

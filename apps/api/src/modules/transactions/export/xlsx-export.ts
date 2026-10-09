@@ -26,11 +26,11 @@ export async function buildTransactionsWorkbook(
   generatedAt: Date,
 ): Promise<Buffer> {
   const workbook = new ExcelJS.Workbook();
-  workbook.creator = 'Finance';
+  workbook.creator = 'My Cashify';
   workbook.created = generatedAt;
   const sheet = workbook.addWorksheet('Transactions', { views: [{ state: 'frozen', ySplit: 2 }] });
   const { columns } = IMPORT_LAYOUT;
-  sheet.getCell(1, 1).value = `Finance export · ${generatedAt.toISOString().slice(0, 10)}`;
+  sheet.getCell(1, 1).value = `My Cashify export · ${generatedAt.toISOString().slice(0, 10)}`;
   sheet.getCell(1, 1).font = { bold: true };
   const header = sheet.getRow(2);
   EXPORT_HEADERS.forEach((label, i) => {
