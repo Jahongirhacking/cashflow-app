@@ -70,3 +70,38 @@ export const transactionQuerySchema = paginationQuerySchema.extend({
   sort: z.enum(TRANSACTION_SORT).default('newest'),
 });
 export type TransactionQuery = z.infer<typeof transactionQuerySchema>;
+
+export interface TransactionFacetCategory {
+  name: string;
+  count: number;
+  /** Type most rows with this category have. */
+  type: TransactionType;
+}
+
+export interface TransactionFacets {
+  total: number;
+  minDate: string | null;
+  maxDate: string | null;
+  categories: TransactionFacetCategory[];
+  paymentMethods: { method: PaymentMethod; count: number }[];
+}
+
+/** Multi-select actions on the Transactions screen. Ids that no longer exist are skipped, not errors. */
+const bulkIdsSchema = z.array(idSchema).min(1).max(500);
+export const bulkTransactionActionSchema = z.discriminatedUnion('action', [
+  z.object({ action: z.literal('delete'), ids: bulkIdsSchema }),
+  z.object({
+    action: z.literal('setCategory'),
+    ids: bulkIdsSchema,
+    category: z.string().trim().min(1, 'Category is required').max(100),
+  }),
+  z.object({ action: z.literal('setType'), ids: bulkIdsSchema, type: transactionTypeSchema }),
+]);
+export type BulkTransactionAction = z.infer<typeof bulkTransactionActionSchema>;
+
+export interface BulkTransactionResult {
+  /** Transactions actually changed or deleted. */
+  affected: number;
+  /** Ids that were not found (already deleted elsewhere). */
+  missing: number;
+}

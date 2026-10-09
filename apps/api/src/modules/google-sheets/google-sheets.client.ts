@@ -132,6 +132,17 @@ export class GoogleSheetsClient extends SheetsClient {
     return toSheetProperties(sheet);
   }
 
+  async appendRows(spreadsheetId: string, sheetId: number, count: number): Promise<void> {
+    if (count <= 0) return;
+    await this.request({
+      method: 'POST',
+      url: `${BASE_URL}/${encodeURIComponent(spreadsheetId)}:batchUpdate`,
+      data: {
+        requests: [{ appendDimension: { sheetId, dimension: 'ROWS', length: count } }],
+      },
+    });
+  }
+
   async deleteRows(
     spreadsheetId: string,
     sheetId: number,

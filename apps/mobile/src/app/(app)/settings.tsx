@@ -1,4 +1,4 @@
-import { LogOut, Moon, Sun, SunMoon } from 'lucide-react-native';
+import { Globe, LogOut, Moon, Sun, SunMoon } from 'lucide-react-native';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
@@ -7,22 +7,31 @@ import { Screen } from '@/components/ui/Screen';
 import { Text } from '@/components/ui/Text';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { SpreadsheetSettingsCard } from '@/features/spreadsheet/components/SpreadsheetSettingsCard';
+import { ExportCard } from '@/features/transactions/export/ExportCard';
+import { ImportCard } from '@/features/transactions/import/ImportCard';
+import { type Locale, LOCALES, useLocale, useT } from '@/i18n';
 import { type ThemeMode, useTheme, useThemeMode } from '@/theme';
-
-const THEME_OPTIONS: { value: ThemeMode; label: string; icon: typeof Sun }[] = [
-  { value: 'light', label: 'Light', icon: Sun },
-  { value: 'dark', label: 'Dark', icon: Moon },
-  { value: 'system', label: 'System', icon: SunMoon },
-];
 
 export default function SettingsScreen() {
   const theme = useTheme();
+  const t = useT();
   const auth = useAuth();
   const { mode, setMode } = useThemeMode();
+  const { locale, setLocale } = useLocale();
+
+  const themeOptions: { value: ThemeMode; label: string; icon: typeof Sun }[] = [
+    { value: 'light', label: t('theme.light'), icon: Sun },
+    { value: 'dark', label: t('theme.dark'), icon: Moon },
+    { value: 'system', label: t('theme.system'), icon: SunMoon },
+  ];
+  const languageOptions: { value: Locale; label: string }[] = LOCALES.map((value) => ({
+    value,
+    label: value === 'uz' ? t('language.uz') : t('language.en'),
+  }));
 
   return (
-    <Screen title="Settings">
-      <SectionLabel>Account</SectionLabel>
+    <Screen title={t('settings.title')}>
+      <SectionLabel>{t('settings.account')}</SectionLabel>
       <Card>
         {auth.user ? (
           <View style={styles.accountRow}>
@@ -34,7 +43,7 @@ export default function SettingsScreen() {
               </Text>
             </View>
             <Button
-              title="Sign out"
+              title={t('common.signOut')}
               variant="secondary"
               size="sm"
               icon={LogOut}
@@ -44,43 +53,92 @@ export default function SettingsScreen() {
         ) : null}
       </Card>
 
-      <SectionLabel style={{ marginTop: theme.spacing.xl }}>Spreadsheet</SectionLabel>
+      <SectionLabel style={{ marginTop: theme.spacing.xl }}>{t('language.title')}</SectionLabel>
+      <Card padding="none">
+        {languageOptions.map((option, index) => (
+          <OptionRow
+            key={option.value}
+            icon={Globe}
+            label={option.label}
+            selected={locale === option.value}
+            first={index === 0}
+            accessibilityLabel={option.label}
+            onPress={() => setLocale(option.value)}
+          />
+        ))}
+      </Card>
+
+      <SectionLabel style={{ marginTop: theme.spacing.xl }}>
+        {t('settings.spreadsheet')}
+      </SectionLabel>
       <SpreadsheetSettingsCard />
 
-      <SectionLabel style={{ marginTop: theme.spacing.xl }}>Appearance</SectionLabel>
+      <SectionLabel style={{ marginTop: theme.spacing.xl }}>{t('settings.data')}</SectionLabel>
+      <View style={{ gap: theme.spacing.md }}>
+        <ExportCard />
+        <ImportCard />
+      </View>
+
+      <SectionLabel style={{ marginTop: theme.spacing.xl }}>
+        {t('settings.appearance')}
+      </SectionLabel>
       <Card padding="none">
-        {THEME_OPTIONS.map((option, index) => {
-          const Icon = option.icon;
-          const selected = mode === option.value;
-          return (
-            <Pressable
-              key={option.value}
-              onPress={() => setMode(option.value)}
-              accessibilityRole="radio"
-              accessibilityState={{ checked: selected }}
-              accessibilityLabel={`${option.label} theme`}
-              style={({ pressed }) => [
-                styles.row,
-                index > 0 ? { borderTopWidth: 1, borderTopColor: theme.colors.border } : null,
-                pressed ? { backgroundColor: theme.colors.surfaceMuted } : null,
-              ]}
-            >
-              <View style={styles.rowLeft}>
-                <Icon size={18} color={theme.colors.textSecondary} />
-                <Text variant="body">{option.label}</Text>
-              </View>
-              <View
-                style={[
-                  styles.radio,
-                  { borderColor: selected ? theme.colors.text : theme.colors.borderStrong },
-                  selected ? { backgroundColor: theme.colors.text } : null,
-                ]}
-              />
-            </Pressable>
-          );
-        })}
+        {themeOptions.map((option, index) => (
+          <OptionRow
+            key={option.value}
+            icon={option.icon}
+            label={option.label}
+            selected={mode === option.value}
+            first={index === 0}
+            accessibilityLabel={option.label}
+            onPress={() => setMode(option.value)}
+          />
+        ))}
       </Card>
     </Screen>
+  );
+}
+
+function OptionRow({
+  icon: Icon,
+  label,
+  selected,
+  first,
+  accessibilityLabel,
+  onPress,
+}: {
+  icon: typeof Sun;
+  label: string;
+  selected: boolean;
+  first: boolean;
+  accessibilityLabel: string;
+  onPress: () => void;
+}) {
+  const theme = useTheme();
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="radio"
+      accessibilityState={{ checked: selected }}
+      accessibilityLabel={accessibilityLabel}
+      style={({ pressed }) => [
+        styles.row,
+        first ? null : { borderTopWidth: 1, borderTopColor: theme.colors.border },
+        pressed ? { backgroundColor: theme.colors.surfaceMuted } : null,
+      ]}
+    >
+      <View style={styles.rowLeft}>
+        <Icon size={18} color={theme.colors.textSecondary} />
+        <Text variant="body">{label}</Text>
+      </View>
+      <View
+        style={[
+          styles.radio,
+          { borderColor: selected ? theme.colors.text : theme.colors.borderStrong },
+          selected ? { backgroundColor: theme.colors.text } : null,
+        ]}
+      />
+    </Pressable>
   );
 }
 

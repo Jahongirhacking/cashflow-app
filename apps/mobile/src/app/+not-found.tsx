@@ -2,16 +2,18 @@ import { useRouter } from 'expo-router';
 import { Button } from '@/components/ui/Button';
 import { Screen } from '@/components/ui/Screen';
 import { Text } from '@/components/ui/Text';
+import { useT } from '@/i18n';
 import { useTheme } from '@/theme';
 
 export default function NotFoundScreen() {
   const router = useRouter();
   const theme = useTheme();
+  const t = useT();
   return (
-    <Screen title="Page not found">
-      <Text color="textSecondary">The page you were looking for doesn&apos;t exist.</Text>
+    <Screen title={t('notFound.title')}>
+      <Text color="textSecondary">{t('notFound.body')}</Text>
       <Button
-        title="Go to dashboard"
+        title={t('notFound.home')}
         onPress={() => router.replace('/')}
         variant="secondary"
         style={{ marginTop: theme.spacing.lg }}

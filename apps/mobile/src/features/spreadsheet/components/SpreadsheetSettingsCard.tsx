@@ -5,14 +5,15 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { Text } from '@/components/ui/Text';
 import { useSpreadsheetStatus, useVerifySpreadsheet } from '@/features/spreadsheet/api';
 import { useSpreadsheetAccess } from '@/features/spreadsheet/SpreadsheetAccessProvider';
+import { useT } from '@/i18n';
 import { useTheme } from '@/theme';
 import * as Linking from 'expo-linking';
 import { useRouter } from 'expo-router';
 import { ExternalLink, RefreshCw } from 'lucide-react-native';
 import { Platform, StyleSheet, View } from 'react-native';
 
-function formatDateTime(iso: string | null): string {
-  if (!iso) return 'Never';
+function formatDateTime(iso: string | null, never: string): string {
+  if (!iso) return never;
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
   return date.toLocaleString();
@@ -20,6 +21,7 @@ function formatDateTime(iso: string | null): string {
 
 export function SpreadsheetSettingsCard() {
   const theme = useTheme();
+  const t = useT();
   const router = useRouter();
   const toast = useToast();
   const status = useSpreadsheetStatus();
@@ -30,12 +32,12 @@ export function SpreadsheetSettingsCard() {
   const state = data?.accessState ?? 'NOT_CONNECTED';
   const stateLabel =
     state === 'OK'
-      ? 'Connected ✓'
+      ? t('sheet.connected')
       : state === 'ACCESS_DENIED'
-        ? 'Access lost'
+        ? t('sheet.accessLost')
         : state === 'NOT_FOUND'
-          ? 'Spreadsheet not found'
-          : 'Not connected';
+          ? t('sheet.notFound')
+          : t('sheet.notConnected');
   const stateColor =
     state === 'OK' ? 'income' : state === 'NOT_CONNECTED' ? 'textSecondary' : 'expense';
 
@@ -56,14 +58,14 @@ export function SpreadsheetSettingsCard() {
       onSuccess: (result) => {
         if (result.connected) {
           clearAccessLost();
-          toast.success('Connection verified');
+          toast.success(t('sheet.verified'));
         } else {
           toast.error(
             'Finance cannot access the spreadsheet. Restore Editor access and try again.',
           );
         }
       },
-      onError: () => toast.error('Could not verify the connection. Please try again.'),
+      onError: () => toast.error(t('sheet.verifyError')),
     });
 
   if (status.isPending) {
@@ -77,25 +79,27 @@ export function SpreadsheetSettingsCard() {
 
   return (
     <Card>
-      <Row label="Connection status">
+      <Row label={t('sheet.status')}>
         <Text variant="bodyStrong" color={stateColor}>
           {stateLabel}
         </Text>
       </Row>
-      <Row label="Spreadsheet">
+      <Row label={t('sheet.name')}>
         <Text variant="body">{data?.spreadsheetName ?? '—'}</Text>
       </Row>
-      <Row label="Last verified">
-        <Text variant="body">{formatDateTime(data?.lastVerifiedAt ?? null)}</Text>
+      <Row label={t('sheet.lastVerified')}>
+        <Text variant="body">
+          {formatDateTime(data?.lastVerifiedAt ?? null, t('common.never'))}
+        </Text>
       </Row>
-      <Row label="Shared with">
+      <Row label={t('sheet.sharedWith')}>
         <Text variant="mono" selectable>
-          {data?.serviceAccountEmail ?? 'Not configured'}
+          {data?.serviceAccountEmail ?? t('sheet.notConfigured')}
         </Text>
       </Row>
       <View style={[styles.actions, { marginTop: theme.spacing.lg }]}>
         <Button
-          title="Open Spreadsheet"
+          title={t('sheet.open')}
           variant="secondary"
           size="sm"
           icon={ExternalLink}
@@ -103,13 +107,13 @@ export function SpreadsheetSettingsCard() {
           onPress={openSpreadsheet}
         />
         <Button
-          title="Reconnect Spreadsheet"
+          title={t('sheet.reconnect')}
           variant="secondary"
           size="sm"
           onPress={() => router.push('/setup/spreadsheet?mode=reconnect')}
         />
         <Button
-          title="Verify Connection"
+          title={t('sheet.verify')}
           variant="secondary"
           size="sm"
           icon={RefreshCw}

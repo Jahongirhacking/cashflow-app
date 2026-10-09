@@ -1,8 +1,9 @@
-import type { LucideIcon } from 'lucide-react-native';
-import { StyleSheet, View } from 'react-native';
 import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
+import { useT } from '@/i18n';
 import { useTheme } from '@/theme';
+import type { LucideIcon } from 'lucide-react-native';
+import { StyleSheet, View } from 'react-native';
 
 export interface EmptyStateProps {
   icon?: LucideIcon;
@@ -65,17 +66,13 @@ export interface ErrorStateProps {
   retrying?: boolean;
 }
 
-export function ErrorState({
-  title = 'Unable to load',
-  message,
-  onRetry,
-  retrying,
-}: ErrorStateProps) {
+export function ErrorState({ title, message, onRetry, retrying }: ErrorStateProps) {
   const theme = useTheme();
+  const t = useT();
   return (
     <View style={styles.container} accessibilityRole="alert">
       <Text variant="subheading" align="center">
-        {title}
+        {title ?? t('errors.unableToLoad')}
       </Text>
       <Text
         variant="caption"
@@ -88,7 +85,7 @@ export function ErrorState({
       {onRetry ? (
         <View style={{ marginTop: theme.spacing.lg }}>
           <Button
-            title="Retry"
+            title={t('common.retry')}
             onPress={onRetry}
             variant="secondary"
             size="sm"

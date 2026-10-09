@@ -6,6 +6,7 @@ export * from './domain/investment';
 export * from './domain/user';
 export * from './domain/spreadsheet';
 export * from './domain/analytics';
+export * from './domain/import';
 export * from './api/errors';
 export * from './api/health';
 export * from './utils/money';

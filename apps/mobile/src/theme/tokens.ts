@@ -160,3 +160,34 @@ export const breakpoints = {
   contentMaxWidth: 1120,
   sidebarWidth: 240,
 } as const;
+
+/** Chart colours validated for colour-vision separation on each surface (see dataviz palette). */
+export interface ChartColors {
+  income: string;
+  expense: string;
+  /** Fixed categorical order; never cycle past the list — fold into `other`. */
+  categorical: string[];
+  other: string;
+  grid: string;
+  axis: string;
+}
+
+export function chartColors(scheme: ColorScheme): ChartColors {
+  return scheme === 'dark'
+    ? {
+        income: '#4ADE80',
+        expense: '#DC2626',
+        categorical: ['#3987e5', '#d95926', '#199e70', '#c98500', '#d55181', '#9085e9'],
+        other: '#6B7A8C',
+        grid: '#232D38',
+        axis: '#34404D',
+      }
+    : {
+        income: '#15803D',
+        expense: '#F87171',
+        categorical: ['#2a78d6', '#eb6834', '#1baf7a', '#eda100', '#e87ba4', '#4a3aa7'],
+        other: '#94A3B8',
+        grid: '#E4E7EB',
+        axis: '#CBD2DA',
+      };
+}

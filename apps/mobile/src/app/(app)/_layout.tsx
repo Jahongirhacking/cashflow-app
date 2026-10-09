@@ -5,7 +5,12 @@ import { hiddenTabRoutes, tabItems } from '@/components/navigation/routes';
 import { Sidebar } from '@/components/navigation/Sidebar';
 import { AccessLostScreen } from '@/features/spreadsheet/components/AccessLostScreen';
 import { useSpreadsheetAccess } from '@/features/spreadsheet/SpreadsheetAccessProvider';
+import {
+  TransactionEditorProvider,
+  useTransactionEditor,
+} from '@/features/transactions/TransactionEditorProvider';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
+import { useT } from '@/i18n';
 import { useTheme } from '@/theme';
 
 /**
@@ -13,7 +18,17 @@ import { useTheme } from '@/theme';
  * Both render the same route tree so deep links work identically everywhere.
  */
 export default function AppLayout() {
+  return (
+    <TransactionEditorProvider>
+      <AppShell />
+    </TransactionEditorProvider>
+  );
+}
+
+function AppShell() {
   const theme = useTheme();
+  const editor = useTransactionEditor();
+  const t = useT();
   const insets = useSafeAreaInsets();
   const { isDesktop } = useBreakpoint();
   const tabBarHeight = 58 + insets.bottom;
@@ -54,9 +69,19 @@ export default function AppLayout() {
                 <Tabs.Screen
                   key={item.name}
                   name={item.name}
+                  listeners={
+                    item.name === 'add'
+                      ? {
+                          tabPress: (event) => {
+                            event.preventDefault();
+                            editor.open({ mode: 'create' });
+                          },
+                        }
+                      : undefined
+                  }
                   options={{
-                    title: item.title,
-                    tabBarAccessibilityLabel: item.title,
+                    title: t(item.titleKey),
+                    tabBarAccessibilityLabel: t(item.titleKey),
                     tabBarIcon: ({ color, size }) => (
                       <Icon color={color} size={size - 2} strokeWidth={2} />
                     ),

@@ -11,6 +11,8 @@ import {
 } from 'react';
 import { Platform, useColorScheme } from 'react-native';
 import {
+  chartColors,
+  type ChartColors,
   type ColorScheme,
   darkColors,
   lightColors,
@@ -26,6 +28,7 @@ export interface Theme {
   scheme: ColorScheme;
   isDark: boolean;
   colors: ThemeColors;
+  chart: ChartColors;
   spacing: typeof spacing;
   radii: typeof radii;
   typography: typeof typography;
@@ -79,6 +82,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       scheme,
       isDark: scheme === 'dark',
       colors: scheme === 'dark' ? darkColors : lightColors,
+      chart: chartColors(scheme),
       spacing,
       radii,
       typography,

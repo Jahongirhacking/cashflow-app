@@ -14,8 +14,11 @@ interface MemorySheet {
   sheetId: number;
   title: string;
   grid: CellValue[][];
+  rowCount: number;
   columnCount: number;
 }
+
+const DEFAULT_ROW_COUNT = 1000;
 
 interface MemorySpreadsheet {
   title: string;
@@ -25,7 +28,8 @@ interface MemorySpreadsheet {
 
 /**
  * Faithful-enough simulation of the Sheets API for tests: trailing empty cells/rows are
- * trimmed from reads, writes grow the grid, deleteRows shifts rows up.
+ * trimmed from reads, writes grow the grid but never past the sheet's row count (Google answers
+ * "exceeds grid limits"), appendRows extends it, deleteRows shifts rows up.
  */
 export class InMemorySheetsClient extends SheetsClient {
   private readonly spreadsheets = new Map<string, MemorySpreadsheet>();
@@ -35,7 +39,7 @@ export class InMemorySheetsClient extends SheetsClient {
   seed(
     spreadsheetId: string,
     title: string,
-    sheets: { title: string; rows: CellValue[][] }[],
+    sheets: { title: string; rows: CellValue[][]; rowCount?: number }[],
   ): void {
     this.spreadsheets.set(spreadsheetId, {
       title,
@@ -44,6 +48,7 @@ export class InMemorySheetsClient extends SheetsClient {
         sheetId: this.nextSheetId++,
         title: s.title,
         grid: s.rows.map((r) => [...r]),
+        rowCount: Math.max(s.rowCount ?? DEFAULT_ROW_COUNT, s.rows.length),
         columnCount: 26,
       })),
     });
@@ -113,9 +118,24 @@ export class InMemorySheetsClient extends SheetsClient {
     if (ss.sheets.some((s) => s.title === title)) {
       throw new AppException('GOOGLE_API_ERROR', `A sheet named "${title}" already exists.`);
     }
-    const sheet: MemorySheet = { sheetId: this.nextSheetId++, title, grid: [], columnCount };
+    const sheet: MemorySheet = {
+      sheetId: this.nextSheetId++,
+      title,
+      grid: [],
+      rowCount: DEFAULT_ROW_COUNT,
+      columnCount,
+    };
     ss.sheets.push(sheet);
     return this.props(sheet, ss.sheets.length - 1);
+  }
+
+  async appendRows(spreadsheetId: string, sheetId: number, count: number): Promise<void> {
+    this.calls.push(`appendRows ${sheetId} ${count}`);
+    const ss = this.open(spreadsheetId);
+    const sheet = ss.sheets.find((x) => x.sheetId === sheetId);
+    if (!sheet) throw new AppException('GOOGLE_API_ERROR', `No sheet with id ${sheetId}.`);
+    sheet.rowCount += Math.max(0, count);
+    return;
   }
 
   async deleteRows(
@@ -152,7 +172,7 @@ export class InMemorySheetsClient extends SheetsClient {
       sheetId: sheet.sheetId,
       title: sheet.title,
       index,
-      rowCount: Math.max(1000, sheet.grid.length),
+      rowCount: sheet.rowCount,
       columnCount: sheet.columnCount,
     };
   }
@@ -179,6 +199,12 @@ export class InMemorySheetsClient extends SheetsClient {
     const { sheet, startCol, startRow } = parseA1(range);
     const s = this.sheet(spreadsheetId, sheet);
     const firstRow = (startRow ?? 1) - 1;
+    if (firstRow + values.length > s.rowCount) {
+      throw new AppException(
+        'GOOGLE_API_ERROR',
+        `Invalid data: Range (${range}) exceeds grid limits. Max rows: ${s.rowCount}, max columns: ${s.columnCount}`,
+      );
+    }
     values.forEach((rowValues, i) => {
       const r = firstRow + i;
       while (s.grid.length <= r) s.grid.push([]);

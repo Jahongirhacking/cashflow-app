@@ -9,35 +9,37 @@ import { Text } from '@/components/ui/Text';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { useSpreadsheetStatus, useVerifySpreadsheet } from '@/features/spreadsheet/api';
 import { useSpreadsheetAccess } from '@/features/spreadsheet/SpreadsheetAccessProvider';
+import { useT } from '@/i18n';
 import { useTheme } from '@/theme';
 
 /** Shown instead of app content when the service account can no longer read the user's sheet. */
 export function AccessLostScreen() {
   const theme = useTheme();
+  const t = useT();
   const router = useRouter();
   const toast = useToast();
   const auth = useAuth();
   const status = useSpreadsheetStatus();
   const verify = useVerifySpreadsheet();
   const { clearAccessLost } = useSpreadsheetAccess();
-  const email = status.data?.serviceAccountEmail ?? 'the Finance service account';
+  const email = status.data?.serviceAccountEmail ?? t('sheet.lost.serviceAccount');
 
   const retry = () => {
     verify.mutate(undefined, {
       onSuccess: (result) => {
         if (result.connected) {
           clearAccessLost();
-          toast.success('Spreadsheet access restored');
+          toast.success(t('sheet.lost.restored'));
         } else {
-          toast.error('Still no access. Check the sharing settings and try again.');
+          toast.error(t('sheet.lost.still'));
         }
       },
-      onError: () => toast.error('Could not verify the connection. Please try again.'),
+      onError: () => toast.error(t('sheet.verifyError')),
     });
   };
 
   return (
-    <Screen title="Spreadsheet access lost">
+    <Screen title={t('sheet.lost.title')}>
       <Card padding="lg" style={styles.card}>
         <View
           style={[
@@ -48,21 +50,26 @@ export function AccessLostScreen() {
           <ShieldAlert size={22} color={theme.colors.warning} />
         </View>
         <Text variant="heading" style={{ marginTop: theme.spacing.md }}>
-          Please restore Editor access
+          {t('sheet.lost.heading')}
         </Text>
         <Text variant="body" color="textSecondary" style={{ marginTop: theme.spacing.sm }}>
-          Finance can no longer read {auth.user?.spreadsheetName ?? 'your spreadsheet'}. Share it
-          again with <Text variant="bodyStrong">{email}</Text> and give it Editor access, or connect
-          a different spreadsheet.
+          {t('sheet.lost.body', {
+            name: auth.user?.spreadsheetName ?? t('sheet.lost.yourSpreadsheet'),
+            email,
+          })}
         </Text>
         <View style={[styles.actions, { marginTop: theme.spacing.xl }]}>
-          <Button title="Try again" onPress={retry} loading={verify.isPending} />
+          <Button title={t('common.tryAgain')} onPress={retry} loading={verify.isPending} />
           <Button
-            title="Reconnect"
+            title={t('sheet.lost.reconnect')}
             variant="secondary"
             onPress={() => router.push('/setup/spreadsheet?mode=reconnect')}
           />
-          <Button title="Open Settings" variant="ghost" onPress={() => router.push('/settings')} />
+          <Button
+            title={t('sheet.lost.openSettings')}
+            variant="ghost"
+            onPress={() => router.push('/settings')}
+          />
         </View>
       </Card>
     </Screen>

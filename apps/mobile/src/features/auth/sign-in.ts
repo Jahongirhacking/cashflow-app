@@ -1,6 +1,7 @@
 import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
 import { Platform } from 'react-native';
+import type { TranslationKey } from '@/i18n';
 import { env } from '@/lib/env';
 
 export type SignInStartResult =
@@ -43,15 +44,15 @@ export function parseCallbackUrl(url: string): SignInStartResult {
   return { kind: 'error', reason: error ?? 'google_error' };
 }
 
-export const SIGN_IN_ERROR_MESSAGES: Record<string, string> = {
-  cancelled: 'Sign-in was cancelled.',
-  invalid_state: 'The sign-in link expired. Please try again.',
-  google_error: 'Google sign-in failed. Please try again.',
-  server_error: 'Something went wrong on our side. Please try again.',
-  not_configured: 'Google sign-in is not configured on the server yet.',
+const SIGN_IN_ERROR_KEYS: Record<string, TranslationKey> = {
+  cancelled: 'auth.error.cancelled',
+  invalid_state: 'auth.error.invalid_state',
+  google_error: 'auth.error.google_error',
+  server_error: 'auth.error.server_error',
+  not_configured: 'auth.error.not_configured',
 };
 
-export function signInErrorMessage(reason: string | null | undefined): string | null {
+export function signInErrorKey(reason: string | null | undefined): TranslationKey | null {
   if (!reason) return null;
-  return SIGN_IN_ERROR_MESSAGES[reason] ?? SIGN_IN_ERROR_MESSAGES.google_error ?? null;
+  return SIGN_IN_ERROR_KEYS[reason] ?? 'auth.error.google_error';
 }

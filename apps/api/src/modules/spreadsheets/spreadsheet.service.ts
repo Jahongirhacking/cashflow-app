@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
   buildSpreadsheetUrl,
+  CATEGORY_SEED_VERSION,
   DEFAULT_CATEGORIES,
   extractSpreadsheetId,
   generateId,
@@ -28,7 +29,6 @@ import {
   CATEGORIES_HEADERS,
   chooseAppBlockColumn,
   findAppBlockColumn,
-  INVESTMENTS_HEADERS,
   isLegacyTransactionsHeader,
   LEGACY_DATA_WIDTH,
   RECURRING_HEADERS,
@@ -147,8 +147,10 @@ export class SpreadsheetService {
     const sheets = new Map(meta.sheets.map((s) => [s.title, s]));
     const settings = new SettingsStore(this.client, spreadsheetId);
     let layout: TransactionsLayout | null = null;
+    let seedVersion: string | undefined;
     if (sheets.has('Settings')) {
       const values = await settings.readAll();
+      seedVersion = values.get(SETTING_KEYS.categoriesSeedVersion);
       const title = values.get(SETTING_KEYS.transactionsSheet);
       const appColumn = Number(values.get(SETTING_KEYS.transactionsAppColumn));
       const format = values.get(SETTING_KEYS.transactionsFormat);
@@ -168,10 +170,10 @@ export class SpreadsheetService {
         };
       }
     }
-    if (!layout) {
-      // Settings missing or stale (user edited the sheet): re-run initialisation, it is idempotent.
-      this.logger.warn(
-        `Spreadsheet ${spreadsheetId} has no valid layout settings; re-initialising`,
+    if (!layout || seedVersion !== CATEGORY_SEED_VERSION) {
+      // Settings missing/stale (user edited the sheet) or new defaults shipped: the initialisation is idempotent.
+      this.logger.log(
+        `Spreadsheet ${spreadsheetId}: ${layout ? 'applying new default categories' : 'no valid layout settings, re-initialising'}`,
       );
       await this.initialize(meta);
       return this.loadContextAfterInit(spreadsheetId);
@@ -283,17 +285,10 @@ export class SpreadsheetService {
     }
 
     // 3. Other app sheets.
-    await ensureSheet('Investments', INVESTMENTS_HEADERS);
     await ensureSheet('Recurring', RECURRING_HEADERS);
     const categories = await ensureSheet('Categories', CATEGORIES_HEADERS);
-    let seeded = current.get(SETTING_KEYS.categoriesSeeded) === 'true';
-    if (!seeded) {
-      const existingRows = await this.client.getValues(
-        spreadsheetId,
-        a1(categories.title, 1, 2, 2),
-      );
-      if (existingRows.length === 0) await this.seedCategories(spreadsheetId, categories.title);
-      seeded = true;
+    if (current.get(SETTING_KEYS.categoriesSeedVersion) !== CATEGORY_SEED_VERSION) {
+      await this.seedMissingCategories(spreadsheetId, categories.title);
     }
 
     await settings.write({
@@ -301,7 +296,7 @@ export class SpreadsheetService {
       [SETTING_KEYS.transactionsSheet]: title,
       [SETTING_KEYS.transactionsFormat]: format,
       [SETTING_KEYS.transactionsAppColumn]: String(appColumn),
-      [SETTING_KEYS.categoriesSeeded]: String(seeded),
+      [SETTING_KEYS.categoriesSeedVersion]: CATEGORY_SEED_VERSION,
     });
   }
 
@@ -327,24 +322,32 @@ export class SpreadsheetService {
     return best ? (best as { sheet: SheetProperties }).sheet : null;
   }
 
-  private async seedCategories(spreadsheetId: string, sheetTitle: string): Promise<void> {
+  /** Additive: appends default categories that are not yet in the sheet (matched by type + name). */
+  private async seedMissingCategories(spreadsheetId: string, sheetTitle: string): Promise<void> {
+    const rows = await this.client.getValues(spreadsheetId, a1(sheetTitle, 1, 2, 3));
+    const existing = new Set<string>();
+    let lastRow = 1;
+    rows.forEach((cells, i) => {
+      if (cells.some((c) => c !== '' && c !== null)) lastRow = i + 2;
+      const name = String(cells[1] ?? '')
+        .trim()
+        .toLowerCase();
+      const type = String(cells[2] ?? '')
+        .trim()
+        .toUpperCase();
+      if (name) existing.add(`${type}:${name}`);
+    });
     const now = new Date().toISOString();
-    const rows: CellValue[][] = DEFAULT_CATEGORIES.map((c) => [
-      generateId('cat'),
-      c.name,
-      c.type,
-      c.kind ?? '',
-      c.icon,
-      '',
-      'TRUE',
-      now,
-      now,
-    ]);
+    const missing: CellValue[][] = DEFAULT_CATEGORIES.filter(
+      (c) => !existing.has(`${c.type}:${c.name.toLowerCase()}`),
+    ).map((c) => [generateId('cat'), c.name, c.type, c.kind ?? '', c.icon, '', 'TRUE', now, now]);
+    if (missing.length === 0) return;
     await this.client.updateValues(
       spreadsheetId,
-      a1(sheetTitle, 1, 2, CATEGORIES_HEADERS.length, rows.length + 1),
-      rows,
+      a1(sheetTitle, 1, lastRow + 1, CATEGORIES_HEADERS.length, lastRow + missing.length),
+      missing,
     );
+    this.logger.log(`Added ${missing.length} default categories to ${spreadsheetId}`);
   }
 
   private toStatus(user: User, accessState: SpreadsheetStatus['accessState']): SpreadsheetStatus {

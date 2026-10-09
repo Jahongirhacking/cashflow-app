@@ -43,6 +43,11 @@ export function configureApiClient(options: {
   if (options.onUnauthorized) unauthorizedHandler = options.onUnauthorized;
 }
 
+/** Bearer token for native clients (null on web, where the session cookie is used). */
+export function getAuthToken(): Promise<string | null> {
+  return tokenProvider();
+}
+
 export function buildUrl(path: string, query?: QueryParams): string {
   const url = new URL(path.startsWith('/') ? path : `/${path}`, `${env.apiUrl}/`);
   if (query) {
@@ -124,10 +129,67 @@ export async function apiRequest<TResponse>(
   return payload as TResponse;
 }
 
+/** Multipart upload (the browser/RN sets the boundary header). Same auth and error handling as apiRequest. */
+export async function apiUpload<TResponse>(
+  path: string,
+  formData: FormData,
+  timeoutMs = 60_000,
+): Promise<TResponse> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  const headers: Record<string, string> = { Accept: 'application/json' };
+  const token = await tokenProvider();
+  if (token) headers.Authorization = `Bearer ${token}`;
+  let response: Response;
+  try {
+    response = await fetch(buildUrl(path), {
+      method: 'POST',
+      headers,
+      body: formData,
+      signal: controller.signal,
+      credentials: Platform.OS === 'web' ? 'include' : 'omit',
+    });
+  } catch (error) {
+    if (controller.signal.aborted) throw new ApiError('TIMEOUT', 'Upload timed out');
+    throw new ApiError(
+      'NETWORK_ERROR',
+      error instanceof Error ? error.message : 'Network request failed',
+    );
+  } finally {
+    clearTimeout(timeout);
+  }
+  const text = await response.text();
+  let payload: unknown = null;
+  try {
+    payload = text ? JSON.parse(text) : null;
+  } catch {
+    if (response.ok)
+      throw new ApiError('UNEXPECTED_RESPONSE', 'Malformed JSON response', response.status);
+  }
+  if (!response.ok) {
+    if (isApiErrorResponse(payload)) {
+      if (payload.code === 'UNAUTHORIZED') unauthorizedHandler();
+      throw notifyError(
+        new ApiError(payload.code, payload.message, payload.statusCode, payload.details),
+      );
+    }
+    throw notifyError(
+      new ApiError(
+        response.status >= 500 ? 'INTERNAL_ERROR' : 'UNEXPECTED_RESPONSE',
+        `Upload failed with status ${response.status}`,
+        response.status,
+      ),
+    );
+  }
+  return payload as TResponse;
+}
+
 export const api = {
   get: <T>(path: string, query?: QueryParams, signal?: AbortSignal) =>
     apiRequest<T>(path, { method: 'GET', query, signal }),
   post: <T>(path: string, body?: unknown) => apiRequest<T>(path, { method: 'POST', body }),
   patch: <T>(path: string, body?: unknown) => apiRequest<T>(path, { method: 'PATCH', body }),
+  put: <T>(path: string, body?: unknown) => apiRequest<T>(path, { method: 'PUT', body }),
   delete: <T>(path: string) => apiRequest<T>(path, { method: 'DELETE' }),
+  upload: apiUpload,
 };

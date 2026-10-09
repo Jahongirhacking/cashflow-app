@@ -12,6 +12,7 @@ import { ToastProvider } from '@/components/feedback/ToastProvider';
 import { AuthProvider, useAuth } from '@/features/auth/AuthProvider';
 import { SpreadsheetAccessProvider } from '@/features/spreadsheet/SpreadsheetAccessProvider';
 import { queryClient } from '@/lib/query/query-client';
+import { I18nProvider, useLocale, useT } from '@/i18n';
 import { ThemeProvider, useTheme, useThemeMode } from '@/theme';
 
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
@@ -21,17 +22,19 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <ThemeProvider>
-          <QueryClientProvider client={queryClient}>
-            <ToastProvider>
-              <AuthProvider>
-                <SpreadsheetAccessProvider>
-                  <AppErrorBoundary>
-                    <RootNavigator />
-                  </AppErrorBoundary>
-                </SpreadsheetAccessProvider>
-              </AuthProvider>
-            </ToastProvider>
-          </QueryClientProvider>
+          <I18nProvider>
+            <QueryClientProvider client={queryClient}>
+              <ToastProvider>
+                <AuthProvider>
+                  <SpreadsheetAccessProvider>
+                    <AppErrorBoundary>
+                      <RootNavigator />
+                    </AppErrorBoundary>
+                  </SpreadsheetAccessProvider>
+                </AuthProvider>
+              </ToastProvider>
+            </QueryClientProvider>
+          </I18nProvider>
         </ThemeProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
@@ -41,22 +44,24 @@ export default function RootLayout() {
 function RootNavigator() {
   const theme = useTheme();
   const { isReady } = useThemeMode();
+  const { isReady: localeReady } = useLocale();
+  const t = useT();
   const auth = useAuth();
   const resolved = auth.status !== 'loading';
 
   useEffect(() => {
-    if (isReady && resolved) SplashScreen.hideAsync().catch(() => undefined);
-  }, [isReady, resolved]);
+    if (isReady && localeReady && resolved) SplashScreen.hideAsync().catch(() => undefined);
+  }, [isReady, localeReady, resolved]);
 
-  if (!isReady || auth.status === 'loading') {
+  if (!isReady || !localeReady || auth.status === 'loading') {
     return <FullScreenLoader />;
   }
 
   if (auth.status === 'error') {
     return (
       <ErrorState
-        title="Can't reach Finance"
-        message="We couldn't check your session. Make sure the API is running and try again."
+        title={t('auth.cannotReach.title')}
+        message={t('auth.cannotReach.body')}
         onRetry={() => void auth.refresh()}
       />
     );
@@ -84,7 +89,7 @@ function RootNavigator() {
           <Stack.Screen name="(auth)" />
         </Stack.Protected>
         <Stack.Screen name="auth/callback" />
-        <Stack.Screen name="+not-found" options={{ title: 'Not found' }} />
+        <Stack.Screen name="+not-found" options={{ title: t('notFound.title') }} />
       </Stack>
     </>
   );

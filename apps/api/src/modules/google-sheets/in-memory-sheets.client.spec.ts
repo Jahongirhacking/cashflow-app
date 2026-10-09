@@ -38,6 +38,18 @@ describe('InMemorySheetsClient', () => {
     expect(await client.getValues('ss1', 'Sheet1!A2:A2')).toEqual([['Salary']]);
   });
 
+  it('rejects writes past the grid until rows are appended, like Google', async () => {
+    const tall = Array.from({ length: 3 }, (_, i) => [`Row ${i}`]);
+    await expect(client.updateValues('ss1', 'Sheet1!A999:A1001', tall)).rejects.toMatchObject({
+      code: 'GOOGLE_API_ERROR',
+      message: expect.stringContaining('exceeds grid limits') as string,
+    });
+    await client.appendRows('ss1', 1, 10);
+    expect((await client.getSpreadsheet('ss1')).sheets[0]?.rowCount).toBe(1010);
+    await client.updateValues('ss1', 'Sheet1!A999:A1001', tall);
+    expect(await client.getValues('ss1', 'Sheet1!A1001:A1001')).toEqual([['Row 2']]);
+  });
+
   it('simulates access and existence errors', async () => {
     await expect(client.getSpreadsheet('missing')).rejects.toMatchObject({
       code: 'SPREADSHEET_NOT_FOUND',

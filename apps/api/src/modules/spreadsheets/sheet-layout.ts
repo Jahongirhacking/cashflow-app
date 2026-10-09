@@ -48,19 +48,6 @@ export const TRANSACTIONS_HEADERS = [
 export const APP_BLOCK_HEADERS = ['Finance ID', 'Izoh', 'Takroriy ID', 'Yaratilgan', 'Yangilangan'];
 export const APP_ID_HEADER = APP_BLOCK_HEADERS[0] as string;
 
-export const INVESTMENTS_HEADERS = [
-  'ID',
-  'Name',
-  'Type',
-  'Invested amount',
-  'Current value',
-  'Start date',
-  'Expected rate %',
-  'Status',
-  'Note',
-  'Created at',
-  'Updated at',
-];
 export const RECURRING_HEADERS = [
   'ID',
   'Name',

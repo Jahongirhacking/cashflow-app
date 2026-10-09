@@ -13,6 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { cardShadow, useTheme } from '@/theme';
 import { Text } from '@/components/ui/Text';
+import { useT } from '@/i18n';
 
 export type ToastTone = 'success' | 'error' | 'info';
 
@@ -110,6 +111,7 @@ function ToastViewport({
 
 function ToastCard({ toast, onDismiss }: { toast: ToastItem; onDismiss: () => void }) {
   const theme = useTheme();
+  const t = useT();
   const Icon =
     toast.tone === 'success' ? CheckCircle2 : toast.tone === 'error' ? CircleAlert : Info;
   const color =
@@ -155,7 +157,7 @@ function ToastCard({ toast, onDismiss }: { toast: ToastItem; onDismiss: () => vo
       <Pressable
         onPress={onDismiss}
         accessibilityRole="button"
-        accessibilityLabel="Dismiss"
+        accessibilityLabel={t('common.dismiss')}
         hitSlop={8}
       >
         <X size={16} color={theme.colors.textMuted} />

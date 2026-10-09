@@ -1,9 +1,13 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query } from '@nestjs/common';
 import {
+  type BulkTransactionAction,
+  bulkTransactionActionSchema,
+  type BulkTransactionResult,
   type CreateTransactionInput,
   createTransactionSchema,
   type Paginated,
   type Transaction,
+  type TransactionFacets,
   type TransactionQuery,
   transactionQuerySchema,
   type UpdateTransactionInput,
@@ -32,6 +36,20 @@ export class TransactionsController {
     @Body(new ZodValidationPipe(createTransactionSchema)) body: CreateTransactionInput,
   ): Promise<Transaction> {
     return this.transactions.create(user, body);
+  }
+
+  @Post('bulk')
+  @HttpCode(200)
+  bulk(
+    @CurrentUser() user: User,
+    @Body(new ZodValidationPipe(bulkTransactionActionSchema)) body: BulkTransactionAction,
+  ): Promise<BulkTransactionResult> {
+    return this.transactions.bulk(user, body);
+  }
+
+  @Get('facets')
+  facets(@CurrentUser() user: User): Promise<TransactionFacets> {
+    return this.transactions.facets(user);
   }
 
   @Get(':id')

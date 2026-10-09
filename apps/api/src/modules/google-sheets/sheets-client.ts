@@ -37,6 +37,8 @@ export abstract class SheetsClient {
     title: string,
     columnCount?: number,
   ): Promise<SheetProperties>;
+  /** Grow a sheet's grid by `count` empty rows (Google rejects writes past the grid, it never auto-extends). */
+  abstract appendRows(spreadsheetId: string, sheetId: number, count: number): Promise<void>;
   abstract deleteRows(
     spreadsheetId: string,
     sheetId: number,

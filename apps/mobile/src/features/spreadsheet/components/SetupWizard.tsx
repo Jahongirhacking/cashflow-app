@@ -1,10 +1,11 @@
-import { connectSpreadsheetSchema, type ConnectSpreadsheetInput } from '@finance/shared';
+import { type ConnectSpreadsheetInput, extractSpreadsheetId } from '@finance/shared';
+import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as Clipboard from 'expo-clipboard';
 import * as Linking from 'expo-linking';
 import { useRouter } from 'expo-router';
 import { Check, Copy, ExternalLink } from 'lucide-react-native';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { ActivityIndicator, StyleSheet, TextInput, View } from 'react-native';
 import { useToast } from '@/components/feedback/ToastProvider';
@@ -15,9 +16,15 @@ import { useAuth } from '@/features/auth/AuthProvider';
 import { useConnectSpreadsheet, useSpreadsheetStatus } from '@/features/spreadsheet/api';
 import { useSpreadsheetAccess } from '@/features/spreadsheet/SpreadsheetAccessProvider';
 import { ApiError, getUserMessage } from '@/lib/api';
+import { useT } from '@/i18n';
 import { useTheme } from '@/theme';
 
-const STEPS = ['Create', 'Share', 'Connect', 'Verify'] as const;
+const STEP_KEYS = [
+  'setup.step.create',
+  'setup.step.share',
+  'setup.step.connect',
+  'setup.step.verify',
+] as const;
 type Step = 0 | 1 | 2 | 3;
 
 export function SetupWizard({ reconnect }: { reconnect: boolean }) {
@@ -70,11 +77,13 @@ export function SetupWizard({ reconnect }: { reconnect: boolean }) {
 
 function Stepper({ step }: { step: Step }) {
   const theme = useTheme();
+  const t = useT();
+  const STEPS = STEP_KEYS.map((k) => t(k));
   return (
     <View
       style={styles.stepper}
       accessibilityRole="progressbar"
-      accessibilityLabel={`Step ${step + 1} of ${STEPS.length}`}
+      accessibilityLabel={t('setup.stepOf', { step: step + 1, total: STEPS.length })}
     >
       {STEPS.map((label, index) => {
         const done = index < step;
@@ -129,20 +138,18 @@ function StepCard({ title, children }: { title: string; children: React.ReactNod
 }
 
 function CreateStep({ onNext }: { onNext: () => void }) {
+  const t = useT();
   return (
-    <StepCard title="Create your Google Spreadsheet">
-      <Text color="textSecondary">
-        Finance stores your financial data in your own Google Spreadsheet. Create a new one, or use
-        the spreadsheet where you already track transactions — existing rows are kept as they are.
-      </Text>
+    <StepCard title={t('setup.create.title')}>
+      <Text color="textSecondary">{t('setup.create.body')}</Text>
       <View style={styles.actions}>
         <Button
-          title="Open Google Sheets"
+          title={t('setup.create.open')}
           variant="secondary"
           icon={ExternalLink}
           onPress={() => void Linking.openURL('https://sheets.google.com/')}
         />
-        <Button title="I've created my spreadsheet" onPress={onNext} />
+        <Button title={t('setup.create.next')} onPress={onNext} />
       </View>
     </StepCard>
   );
@@ -160,6 +167,7 @@ function ShareStep({
   onBack: () => void;
 }) {
   const theme = useTheme();
+  const t = useT();
   const toast = useToast();
   const copy = async () => {
     if (!email) return;
@@ -167,10 +175,8 @@ function ShareStep({
     toast.success('Email copied');
   };
   return (
-    <StepCard title="Share your spreadsheet">
-      <Text color="textSecondary">
-        Share your spreadsheet with this email and give it Editor access.
-      </Text>
+    <StepCard title={t('setup.share.title')}>
+      <Text color="textSecondary">{t('setup.share.body')}</Text>
       <View
         style={[
           styles.emailBox,
@@ -181,11 +187,11 @@ function ShareStep({
           <ActivityIndicator color={theme.colors.textSecondary} />
         ) : (
           <Text variant="mono" selectable style={{ flex: 1 }} color={email ? 'text' : 'warning'}>
-            {email ?? 'Service account not configured on the server'}
+            {email ?? t('setup.share.notConfigured')}
           </Text>
         )}
         <Button
-          title="Copy email"
+          title={t('setup.share.copy')}
           size="sm"
           variant="secondary"
           icon={Copy}
@@ -207,8 +213,8 @@ function ShareStep({
         ))}
       </View>
       <View style={styles.actions}>
-        <Button title="Back" variant="ghost" onPress={onBack} />
-        <Button title="I've shared it" onPress={onNext} />
+        <Button title={t('common.back')} variant="ghost" onPress={onBack} />
+        <Button title={t('setup.share.next')} onPress={onNext} />
       </View>
     </StepCard>
   );
@@ -222,14 +228,26 @@ function ConnectStep({
   onBack: () => void;
 }) {
   const theme = useTheme();
+  const t = useT();
+  const schema = useMemo(
+    () =>
+      z.object({
+        spreadsheetUrl: z
+          .string()
+          .trim()
+          .min(1, t('setup.connect.required'))
+          .refine((value) => extractSpreadsheetId(value) !== null, t('setup.connect.invalid')),
+      }),
+    [t],
+  );
   const form = useForm<ConnectSpreadsheetInput>({
-    resolver: zodResolver(connectSpreadsheetSchema),
+    resolver: zodResolver(schema),
     defaultValues: { spreadsheetUrl: '' },
     mode: 'onSubmit',
   });
   const error = form.formState.errors.spreadsheetUrl?.message;
   return (
-    <StepCard title="Paste your Google Spreadsheet URL">
+    <StepCard title={t('setup.connect.title')}>
       <Controller
         control={form.control}
         name="spreadsheetUrl"
@@ -243,7 +261,7 @@ function ConnectStep({
             autoCapitalize="none"
             autoCorrect={false}
             keyboardType="url"
-            accessibilityLabel="Spreadsheet URL"
+            accessibilityLabel={t('setup.connect.label')}
             onSubmitEditing={() => void form.handleSubmit(onSubmit)()}
             style={[
               styles.input,
@@ -264,8 +282,11 @@ function ConnectStep({
         </Text>
       ) : null}
       <View style={styles.actions}>
-        <Button title="Back" variant="ghost" onPress={onBack} />
-        <Button title="Connect Spreadsheet" onPress={() => void form.handleSubmit(onSubmit)()} />
+        <Button title={t('common.back')} variant="ghost" onPress={onBack} />
+        <Button
+          title={t('setup.connect.button')}
+          onPress={() => void form.handleSubmit(onSubmit)()}
+        />
       </View>
     </StepCard>
   );
@@ -285,6 +306,7 @@ function VerifyStep({
   onRetry: () => void;
 }) {
   const theme = useTheme();
+  const t = useT();
   const auth = useAuth();
   const [dots, setDots] = useState('');
   useEffect(() => {
@@ -295,10 +317,13 @@ function VerifyStep({
 
   if (pending) {
     return (
-      <StepCard title="Verifying access">
+      <StepCard title={t('setup.verify.title')}>
         <View style={styles.row}>
           <ActivityIndicator color={theme.colors.textSecondary} />
-          <Text color="textSecondary">Checking that Finance can read your spreadsheet{dots}</Text>
+          <Text color="textSecondary">
+            {t('setup.verify.checking')}
+            {dots}
+          </Text>
         </View>
       </StepCard>
     );
@@ -342,7 +367,7 @@ function VerifyStep({
           </Text>
         )}
         <View style={styles.actions}>
-          <Button title="Try again" onPress={onRetry} />
+          <Button title={t('common.tryAgain')} onPress={onRetry} />
         </View>
       </StepCard>
     );

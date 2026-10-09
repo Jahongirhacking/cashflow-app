@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Avatar } from '@/components/ui/Avatar';
 import { Text } from '@/components/ui/Text';
 import { useAuth } from '@/features/auth/AuthProvider';
+import { useT } from '@/i18n';
 import { useInteractionState } from '@/hooks/useInteractionState';
 import { breakpoints, useTheme, useThemeMode } from '@/theme';
 import { type NavItem, sidebarItems } from './routes';
@@ -66,6 +67,8 @@ export function Sidebar() {
 
 function SidebarLink({ item, active }: { item: NavItem; active: boolean }) {
   const theme = useTheme();
+  const t = useT();
+  const title = t(item.titleKey);
   const { hovered, pressed, handlers } = useInteractionState();
   const Icon = item.icon;
   return (
@@ -73,7 +76,7 @@ function SidebarLink({ item, active }: { item: NavItem; active: boolean }) {
       <Pressable
         {...handlers}
         accessibilityRole="link"
-        accessibilityLabel={item.title}
+        accessibilityLabel={title}
         accessibilityState={{ selected: active }}
         style={StyleSheet.flatten([
           styles.link,
@@ -88,7 +91,7 @@ function SidebarLink({ item, active }: { item: NavItem; active: boolean }) {
           strokeWidth={2}
         />
         <Text variant={active ? 'bodyStrong' : 'body'} color={active ? 'text' : 'textSecondary'}>
-          {item.title}
+          {title}
         </Text>
       </Pressable>
     </Link>
@@ -97,13 +100,14 @@ function SidebarLink({ item, active }: { item: NavItem; active: boolean }) {
 
 function UserChip() {
   const theme = useTheme();
+  const t = useT();
   const { user } = useAuth();
   if (!user) return null;
   return (
     <Link href="/settings" asChild>
       <Pressable
         accessibilityRole="link"
-        accessibilityLabel="Account settings"
+        accessibilityLabel={t('nav.accountSettings')}
         style={StyleSheet.flatten([styles.userChip, { borderRadius: theme.radii.md }])}
       >
         <Avatar name={user.name} uri={user.picture} size={28} />
@@ -122,11 +126,12 @@ function UserChip() {
 
 function ThemeModeSwitch() {
   const theme = useTheme();
+  const t = useT();
   const { mode, setMode } = useThemeMode();
   const options = [
-    { value: 'light', icon: Sun, label: 'Light theme' },
-    { value: 'system', icon: SunMoon, label: 'System theme' },
-    { value: 'dark', icon: Moon, label: 'Dark theme' },
+    { value: 'light', icon: Sun, label: t('theme.lightTheme') },
+    { value: 'system', icon: SunMoon, label: t('theme.systemTheme') },
+    { value: 'dark', icon: Moon, label: t('theme.darkTheme') },
   ] as const;
 
   return (

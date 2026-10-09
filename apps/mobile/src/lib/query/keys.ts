@@ -11,6 +11,7 @@ export const queryKeys = {
   transactions: {
     all: ['transactions'] as const,
     list: (params: Record<string, unknown>) => ['transactions', 'list', params] as const,
+    facets: ['transactions', 'facets'] as const,
     detail: (id: string) => ['transactions', 'detail', id] as const,
   },
   categories: {
@@ -18,16 +19,22 @@ export const queryKeys = {
   },
   recurring: {
     all: ['recurring'] as const,
+    list: ['recurring', 'list'] as const,
+    schedule: (month: string) => ['recurring', 'schedule', month] as const,
   },
   investments: {
     all: ['investments'] as const,
-    detail: (id: string) => ['investments', 'detail', id] as const,
   },
   analytics: {
     all: ['analytics'] as const,
-    overview: ['analytics', 'overview'] as const,
+    overview: (period: string) => ['analytics', 'overview', period] as const,
     monthly: (months: number) => ['analytics', 'monthly', months] as const,
-    categories: (month: string | null) => ['analytics', 'categories', month] as const,
-    fixedVariable: (month: string | null) => ['analytics', 'fixed-variable', month] as const,
+    categories: (period: string, type: string) =>
+      ['analytics', 'categories', period, type] as const,
+    fixedVariable: (period: string) => ['analytics', 'fixed-variable', period] as const,
+    trend: (period: string) => ['analytics', 'trend', period] as const,
+  },
+  planning: {
+    month: (params: Record<string, unknown>) => ['analytics', 'planning', params] as const,
   },
 } as const;

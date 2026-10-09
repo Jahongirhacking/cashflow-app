@@ -6,7 +6,8 @@ import { Card } from '@/components/ui/Card';
 import { GoogleLogo } from '@/components/ui/GoogleLogo';
 import { Text } from '@/components/ui/Text';
 import { useAuth } from '@/features/auth/AuthProvider';
-import { signInErrorMessage } from '@/features/auth/sign-in';
+import { signInErrorKey } from '@/features/auth/sign-in';
+import { useT } from '@/i18n';
 import { useInteractionState } from '@/hooks/useInteractionState';
 import { useTheme } from '@/theme';
 
@@ -14,6 +15,7 @@ export default function LoginScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const auth = useAuth();
+  const t = useT();
   const params = useLocalSearchParams<{ error?: string }>();
 
   useEffect(() => {
@@ -22,7 +24,8 @@ export default function LoginScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.error]);
 
-  const errorMessage = signInErrorMessage(auth.lastSignInError);
+  const errorKey = signInErrorKey(auth.lastSignInError);
+  const errorMessage = errorKey ? t(errorKey) : null;
 
   return (
     <View
@@ -55,7 +58,7 @@ export default function LoginScreen() {
           align="center"
           style={{ marginTop: theme.spacing.sm }}
         >
-          Your Google Spreadsheet, as a modern finance app.
+          {t('auth.tagline')}
         </Text>
 
         {errorMessage ? (
@@ -84,8 +87,7 @@ export default function LoginScreen() {
           align="center"
           style={{ marginTop: theme.spacing.lg }}
         >
-          We only use Google to confirm who you are. Your financial data stays in your own
-          spreadsheet.
+          {t('auth.privacy')}
         </Text>
       </Card>
     </View>
@@ -94,13 +96,14 @@ export default function LoginScreen() {
 
 function GoogleButton({ onPress }: { onPress: () => void }) {
   const theme = useTheme();
+  const t = useT();
   const { hovered, pressed, handlers } = useInteractionState();
   return (
     <Pressable
       {...handlers}
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityLabel="Continue with Google"
+      accessibilityLabel={t('auth.continueWithGoogle')}
       style={[
         styles.googleButton,
         {
@@ -112,7 +115,7 @@ function GoogleButton({ onPress }: { onPress: () => void }) {
       ]}
     >
       <GoogleLogo size={18} />
-      <Text variant="bodyStrong">Continue with Google</Text>
+      <Text variant="bodyStrong">{t('auth.continueWithGoogle')}</Text>
     </Pressable>
   );
 }

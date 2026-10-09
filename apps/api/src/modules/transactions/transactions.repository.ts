@@ -9,6 +9,8 @@ import type { SpreadsheetContext } from '../spreadsheets/spreadsheet-context';
 import { TransactionRowAdapter } from './transaction-row.adapter';
 
 const TABLE_TTL_MS = 60_000;
+/** Extra empty rows added whenever the sheet has to grow, so bulk imports grow it once, not per chunk. */
+const GROW_SLACK_ROWS = 500;
 
 export interface TransactionTable {
   items: Transaction[];
@@ -40,9 +42,33 @@ export class TransactionsRepository {
     const existing = table.items.find((t) => t.id === transaction.id);
     if (existing) return existing; // idempotent retry
     const lastRow = await this.findLastRow(ctx, table.lastRow);
+    await this.ensureRows(ctx, lastRow + 1);
     await this.writeRow(ctx, lastRow + 1, transaction);
     this.cache.invalidate(this.key(ctx));
     return transaction;
+  }
+
+  /** Append many rows with two rectangular writes (data block + app block) instead of one call per row. */
+  async insertMany(ctx: SpreadsheetContext, transactions: Transaction[]): Promise<void> {
+    if (transactions.length === 0) return;
+    const table = await this.getTable(ctx, transactions[0]?.userId ?? '');
+    const lastRow = await this.findLastRow(ctx, table.lastRow);
+    const { sheetTitle, columns } = ctx.transactions;
+    const adapter = new TransactionRowAdapter(ctx.transactions);
+    const first = lastRow + 1;
+    const last = lastRow + transactions.length;
+    await this.ensureRows(ctx, last);
+    await this.client.batchUpdateValues(ctx.spreadsheetId, [
+      {
+        range: a1(sheetTitle, 1, first, LEGACY_DATA_WIDTH, last),
+        values: transactions.map((t) => adapter.dataCells(t)),
+      },
+      {
+        range: a1(sheetTitle, columns.id, first, columns.id + APP_BLOCK_WIDTH - 1, last),
+        values: transactions.map((t) => adapter.appCells(t)),
+      },
+    ]);
+    this.cache.invalidate(this.key(ctx));
   }
 
   async update(ctx: SpreadsheetContext, transaction: Transaction): Promise<Transaction> {
@@ -52,6 +78,68 @@ export class TransactionsRepository {
     await this.writeRow(ctx, row, transaction);
     this.cache.invalidate(this.key(ctx));
     return transaction;
+  }
+
+  /** Rewrite many existing rows in one batched request. Unknown ids are ignored. */
+  async updateMany(ctx: SpreadsheetContext, transactions: Transaction[]): Promise<number> {
+    if (transactions.length === 0) return 0;
+    const table = await this.getTable(ctx, transactions[0]?.userId ?? '');
+    const { sheetTitle, columns } = ctx.transactions;
+    const adapter = new TransactionRowAdapter(ctx.transactions);
+    const updates: { range: string; values: CellValue[][] }[] = [];
+    let affected = 0;
+    for (const transaction of transactions) {
+      const row = table.rowById.get(transaction.id);
+      if (!row) continue;
+      affected += 1;
+      updates.push(
+        {
+          range: a1(sheetTitle, 1, row, LEGACY_DATA_WIDTH, row),
+          values: [adapter.dataCells(transaction)],
+        },
+        {
+          range: a1(sheetTitle, columns.id, row, columns.id + APP_BLOCK_WIDTH - 1, row),
+          values: [adapter.appCells(transaction)],
+        },
+      );
+    }
+    if (updates.length > 0) await this.client.batchUpdateValues(ctx.spreadsheetId, updates);
+    this.cache.invalidate(this.key(ctx));
+    return affected;
+  }
+
+  /** Delete many rows: one clear request on legacy sheets, contiguous row runs on app sheets. */
+  async removeMany(ctx: SpreadsheetContext, userId: string, ids: string[]): Promise<number> {
+    const table = await this.getTable(ctx, userId);
+    const rows = [
+      ...new Set(
+        ids.map((id) => table.rowById.get(id)).filter((r): r is number => r !== undefined),
+      ),
+    ].sort((a, b) => a - b);
+    if (rows.length === 0) return 0;
+    const { sheetTitle, sheetId, format, columns } = ctx.transactions;
+    if (format === 'app') {
+      // Delete from the bottom up so earlier row numbers stay valid; merge consecutive rows into one call.
+      const runs: [number, number][] = [];
+      for (const row of rows) {
+        const last = runs[runs.length - 1];
+        if (last && last[1] === row - 1) last[1] = row;
+        else runs.push([row, row]);
+      }
+      for (const [start, end] of runs.reverse()) {
+        await this.client.deleteRows(ctx.spreadsheetId, sheetId, start, end);
+      }
+    } else {
+      await this.client.clearValues(
+        ctx.spreadsheetId,
+        rows.flatMap((row) => [
+          a1(sheetTitle, 1, row, LEGACY_DATA_WIDTH, row),
+          a1(sheetTitle, columns.id, row, columns.id + APP_BLOCK_WIDTH - 1, row),
+        ]),
+      );
+    }
+    this.cache.invalidate(this.key(ctx));
+    return rows.length;
   }
 
   async remove(ctx: SpreadsheetContext, userId: string, id: string): Promise<void> {
@@ -113,6 +201,29 @@ export class TransactionsRepository {
       await this.client.batchUpdateValues(ctx.spreadsheetId, backfill);
     }
     return { items, rowById, lastRow };
+  }
+
+  /**
+   * Google never extends a sheet on write: a range past the last grid row fails with
+   * "exceeds grid limits". Grow the grid first whenever an append would reach beyond it.
+   */
+  private async ensureRows(ctx: SpreadsheetContext, lastRowNeeded: number): Promise<void> {
+    const { sheetTitle, sheetId } = ctx.transactions;
+    const cached = ctx.sheets.get(sheetTitle);
+    if (cached && lastRowNeeded <= cached.rowCount) return;
+    // The cached count may be stale (the user may have resized the sheet): confirm it live.
+    const meta = await this.client.getSpreadsheet(ctx.spreadsheetId);
+    const live =
+      meta.sheets.find((s) => s.sheetId === sheetId) ??
+      meta.sheets.find((s) => s.title === sheetTitle);
+    let rowCount = live?.rowCount ?? cached?.rowCount ?? 0;
+    if (lastRowNeeded > rowCount) {
+      const extra = lastRowNeeded - rowCount + GROW_SLACK_ROWS;
+      await this.client.appendRows(ctx.spreadsheetId, sheetId, extra);
+      rowCount += extra;
+    }
+    if (live) ctx.sheets.set(sheetTitle, { ...live, rowCount });
+    else if (cached) cached.rowCount = rowCount;
   }
 
   /** Re-check the sheet's tail right before appending so concurrent writers never overwrite each other. */

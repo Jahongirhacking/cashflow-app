@@ -2,6 +2,7 @@ import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
+import { useT } from '@/i18n';
 import { useTheme } from '@/theme';
 
 interface Props {
@@ -34,10 +35,11 @@ export class AppErrorBoundary extends Component<Props, State> {
 
 function ErrorFallback({ onRetry }: { onRetry: () => void }) {
   const theme = useTheme();
+  const t = useT();
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <Text variant="heading" align="center">
-        Something went wrong
+        {t('errors.screen.title')}
       </Text>
       <Text
         variant="body"
@@ -45,10 +47,10 @@ function ErrorFallback({ onRetry }: { onRetry: () => void }) {
         align="center"
         style={{ marginTop: theme.spacing.sm }}
       >
-        The screen hit an unexpected error. Your data is safe in your spreadsheet.
+        {t('errors.screen.body')}
       </Text>
       <View style={{ marginTop: theme.spacing.xl }}>
-        <Button title="Try again" onPress={onRetry} />
+        <Button title={t('common.tryAgain')} onPress={onRetry} />
       </View>
     </View>
   );

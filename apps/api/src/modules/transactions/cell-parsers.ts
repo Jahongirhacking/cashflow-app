@@ -62,7 +62,9 @@ export function parseCellAmount(cell: CellValue | undefined): number | null {
   if (cell === null || cell === undefined || cell === '') return null;
   if (typeof cell === 'number') return Number.isFinite(cell) ? cell : null;
   if (typeof cell === 'boolean') return null;
-  let text = cell.replace(/[\s\u00a0']/g, '');
+  // Drop currency labels and spaces: "-1,400so'm", "1 250 000 сум", "UZS 50,000".
+  let text = cell.replace(/[^\d,.-]/g, '');
+  if (!text) return null;
   if (/^-?\d{1,3}(,\d{3})+(\.\d+)?$/.test(text)) {
     text = text.replace(/,/g, ''); // thousands separators
   } else if (/^-?\d+,\d+$/.test(text)) {

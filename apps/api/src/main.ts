@@ -12,6 +12,8 @@ async function bootstrap(): Promise<void> {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
   const config = app.get(AppConfigService);
 
+  // Import previews/commits carry hundreds of rows per request; keep the limit generous but bounded.
+  app.useBodyParser('json', { limit: '5mb' });
   app.set('trust proxy', 1);
   app.disable('x-powered-by');
   app.use(

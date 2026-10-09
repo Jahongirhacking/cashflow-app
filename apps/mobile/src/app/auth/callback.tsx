@@ -2,6 +2,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useRef } from 'react';
 import { FullScreenLoader } from '@/components/feedback/FullScreenLoader';
 import { useAuth } from '@/features/auth/AuthProvider';
+import { useT } from '@/i18n';
 
 /**
  * Landing route after Google sign-in.
@@ -11,6 +12,7 @@ import { useAuth } from '@/features/auth/AuthProvider';
 export default function AuthCallbackScreen() {
   const router = useRouter();
   const auth = useAuth();
+  const t = useT();
   const params = useLocalSearchParams<{ code?: string; error?: string }>();
   const handled = useRef(false);
 
@@ -34,5 +36,5 @@ export default function AuthCallbackScreen() {
     void finish();
   }, [auth, params.code, params.error, router]);
 
-  return <FullScreenLoader label="Signing you in…" />;
+  return <FullScreenLoader label={t('auth.signingIn')} />;
 }

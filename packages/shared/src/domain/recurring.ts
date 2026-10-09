@@ -2,7 +2,8 @@ import { z } from 'zod';
 import { idSchema, isoDateSchema, isoDateTimeSchema, moneyAmountSchema } from './common';
 import { paymentMethodSchema, transactionTypeSchema } from './transaction';
 
-export const RECURRING_FREQUENCIES = ['DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY'] as const;
+/** ONCE = a single unavoidable payment on `startDate` (e.g. a contract instalment). */
+export const RECURRING_FREQUENCIES = ['ONCE', 'DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY'] as const;
 export type RecurringFrequency = (typeof RECURRING_FREQUENCIES)[number];
 export const recurringFrequencySchema = z.enum(RECURRING_FREQUENCIES);
 
@@ -48,3 +49,47 @@ export type CreateRecurringRuleInput = z.infer<typeof createRecurringRuleSchema>
 
 export const updateRecurringRuleSchema = createRecurringRuleSchema.partial();
 export type UpdateRecurringRuleInput = z.infer<typeof updateRecurringRuleSchema>;
+
+export const OCCURRENCE_STATUSES = ['paid', 'due', 'overdue', 'received', 'expected'] as const;
+export type OccurrenceStatus = (typeof OCCURRENCE_STATUSES)[number];
+
+/** One dated instance of a rule inside a month, with its payment state. */
+export interface RecurringOccurrence {
+  ruleId: string;
+  name: string;
+  amount: number;
+  type: TransactionTypeValue;
+  category: string;
+  paymentMethod: PaymentMethodValue;
+  frequency: RecurringFrequency;
+  dueDate: string;
+  status: OccurrenceStatus;
+  /** Transaction that settled this occurrence, when found. */
+  transactionId: string | null;
+  /** True when the settling transaction was matched by name rather than by rule id. */
+  matchedByName: boolean;
+  /** True when the user ticked this occurrence off as a reminder (no transaction involved). */
+  markedDone: boolean;
+}
+
+export interface RecurringSchedule {
+  month: string;
+  today: string;
+  occurrences: RecurringOccurrence[];
+  totals: {
+    expenseDue: number;
+    expensePaid: number;
+    incomeExpected: number;
+    incomeReceived: number;
+  };
+}
+
+/** Reminder tick for one occurrence; it never touches transactions. */
+export const markOccurrenceSchema = z.object({
+  dueDate: isoDateSchema,
+  done: z.boolean(),
+});
+export type MarkOccurrenceInput = z.infer<typeof markOccurrenceSchema>;
+
+type TransactionTypeValue = z.infer<typeof transactionTypeSchema>;
+type PaymentMethodValue = z.infer<typeof paymentMethodSchema>;

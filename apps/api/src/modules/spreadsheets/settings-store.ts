@@ -8,7 +8,7 @@ export const SETTING_KEYS = {
   transactionsSheet: 'transactions.sheet',
   transactionsFormat: 'transactions.format',
   transactionsAppColumn: 'transactions.appColumn',
-  categoriesSeeded: 'categories.seeded',
+  categoriesSeedVersion: 'categories.seedVersion',
 } as const;
 
 export const SCHEMA_VERSION = '1';

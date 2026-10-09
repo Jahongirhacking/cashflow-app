@@ -49,6 +49,12 @@ export function seedDemoSpreadsheet(client: InMemorySheetsClient): void {
     ['Taksi', -42280, 'P', serial('2026-10-06'), 0.8, 'Transport'],
     ['Bozor', -350000, 'N', serial('2026-10-06'), 0.42, 'Ovqat'],
     ['Metro', -2500, 'N', '07.10.2026', '08:15', 'Transport'],
+    // Investments are derived from these categories: expense = money in, income = money out.
+    ['Kapitalbank depozit', -10000000, 'P', serial('2026-08-04'), 0.5, 'Deposit'],
+    ['Depozit foizi', 150000, 'P', serial('2026-09-04'), 0.5, 'Deposit'],
+    ['Depozit foizi', 150000, 'P', serial('2026-10-04'), 0.5, 'Deposit'],
+    ['BTC sotib olish', -2000000, 'P', serial('2026-09-20'), 0.6, 'Crypto'],
+    ['BTC sotish', 2600000, 'P', serial('2026-10-02'), 0.6, 'Crypto'],
   ];
   client.seed(DEMO_SPREADSHEET_ID, 'Demo byudjet', [{ title: 'Xarajatlar', rows }]);
 }

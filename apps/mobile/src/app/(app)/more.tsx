@@ -6,11 +6,13 @@ import { Card } from '@/components/ui/Card';
 import { Screen } from '@/components/ui/Screen';
 import { Text } from '@/components/ui/Text';
 import { useInteractionState } from '@/hooks/useInteractionState';
+import { useT } from '@/i18n';
 import { useTheme } from '@/theme';
 
 export default function MoreScreen() {
+  const t = useT();
   return (
-    <Screen title="More">
+    <Screen title={t('nav.more')}>
       <Card padding="none">
         {moreItems.map((item, index) => (
           <MoreRow key={item.name} item={item} first={index === 0} />
@@ -22,6 +24,8 @@ export default function MoreScreen() {
 
 function MoreRow({ item, first }: { item: NavItem; first: boolean }) {
   const theme = useTheme();
+  const t = useT();
+  const title = t(item.titleKey);
   const { hovered, pressed, handlers } = useInteractionState();
   const Icon = item.icon;
   return (
@@ -29,7 +33,7 @@ function MoreRow({ item, first }: { item: NavItem; first: boolean }) {
       <Pressable
         {...handlers}
         accessibilityRole="link"
-        accessibilityLabel={item.title}
+        accessibilityLabel={title}
         style={StyleSheet.flatten([
           styles.row,
           first ? null : { borderTopWidth: 1, borderTopColor: theme.colors.border },
@@ -38,7 +42,7 @@ function MoreRow({ item, first }: { item: NavItem; first: boolean }) {
       >
         <View style={styles.rowLeft}>
           <Icon size={18} color={theme.colors.textSecondary} />
-          <Text variant="body">{item.title}</Text>
+          <Text variant="body">{title}</Text>
         </View>
         <ChevronRight size={18} color={theme.colors.textMuted} />
       </Pressable>

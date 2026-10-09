@@ -40,3 +40,6 @@ apps/mobile/ios/
 
 # tests
 coverage/
+
+# smoke-test build output (see ~/.cache/finance-harness)
+apps/api/dist-harness/

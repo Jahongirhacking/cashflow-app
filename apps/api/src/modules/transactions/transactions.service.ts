@@ -1,11 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import {
+  type BulkTransactionAction,
+  type BulkTransactionResult,
   compareIsoDates,
   type CreateTransactionInput,
   generateId,
   type Paginated,
+  type PaymentMethod,
   type Transaction,
+  type TransactionFacetCategory,
+  type TransactionFacets,
   type TransactionQuery,
+  type TransactionType,
   type UpdateTransactionInput,
   type User,
 } from '@finance/shared';
@@ -52,6 +58,45 @@ export class TransactionsService {
       page: query.page,
       pageSize: query.pageSize,
       hasMore: start + items.length < filtered.length,
+    };
+  }
+
+  /** Distinct values used in the sheet, for filter UIs (legacy rows use categories that are not in the Categories sheet). */
+  async facets(user: User): Promise<TransactionFacets> {
+    const all = await this.listAll(user);
+    const categories = new Map<
+      string,
+      { name: string; count: number; type: Record<TransactionType, number> }
+    >();
+    const paymentMethods = new Map<PaymentMethod, number>();
+    let minDate: string | null = null;
+    let maxDate: string | null = null;
+    for (const t of all) {
+      const key = t.category.toLowerCase();
+      const entry = categories.get(key) ?? {
+        name: t.category,
+        count: 0,
+        type: { INCOME: 0, EXPENSE: 0 },
+      };
+      entry.count += 1;
+      entry.type[t.type] += 1;
+      categories.set(key, entry);
+      paymentMethods.set(t.paymentMethod, (paymentMethods.get(t.paymentMethod) ?? 0) + 1);
+      if (!minDate || t.date < minDate) minDate = t.date;
+      if (!maxDate || t.date > maxDate) maxDate = t.date;
+    }
+    return {
+      total: all.length,
+      minDate,
+      maxDate,
+      categories: [...categories.values()]
+        .map((c): TransactionFacetCategory => ({
+          name: c.name,
+          count: c.count,
+          type: c.type.EXPENSE >= c.type.INCOME ? 'EXPENSE' : 'INCOME',
+        }))
+        .sort((a, b) => b.count - a.count),
+      paymentMethods: [...paymentMethods.entries()].map(([method, count]) => ({ method, count })),
     };
   }
 
@@ -104,6 +149,32 @@ export class TransactionsService {
   async remove(user: User, id: string): Promise<void> {
     const ctx = await this.spreadsheets.getContext(user);
     await this.repo.remove(ctx, user.id, id);
+  }
+
+  /** Apply one change to many transactions at once (multi-select on the Transactions screen). */
+  async bulk(user: User, input: BulkTransactionAction): Promise<BulkTransactionResult> {
+    const ctx = await this.spreadsheets.getContext(user);
+    const ids = [...new Set(input.ids)];
+    if (input.action === 'delete') {
+      const affected = await this.repo.removeMany(ctx, user.id, ids);
+      return { affected, missing: ids.length - affected };
+    }
+    const table = await this.repo.getTable(ctx, user.id);
+    const byId = new Map(table.items.map((t) => [t.id, t]));
+    const now = new Date().toISOString();
+    const updated: Transaction[] = [];
+    for (const id of ids) {
+      const existing = byId.get(id);
+      if (!existing) continue;
+      if (input.action === 'setCategory') {
+        if (existing.category === input.category) continue;
+        updated.push({ ...existing, category: input.category, updatedAt: now });
+      } else if (existing.type !== input.type) {
+        updated.push({ ...existing, type: input.type, updatedAt: now });
+      }
+    }
+    const affected = await this.repo.updateMany(ctx, updated);
+    return { affected, missing: ids.filter((id) => !byId.has(id)).length };
   }
 }
 

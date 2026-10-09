@@ -40,8 +40,14 @@ export interface DefaultCategory {
   icon: string;
 }
 
+/** Bump when defaults change; existing spreadsheets receive the missing entries on next initialisation. */
+export const CATEGORY_SEED_VERSION = '3';
+
 export const DEFAULT_CATEGORIES: readonly DefaultCategory[] = [
   { name: 'Salary', type: 'INCOME', kind: null, icon: 'briefcase' },
+  { name: 'Deposit', type: 'INCOME', kind: null, icon: 'piggy-bank' },
+  { name: 'Crypto', type: 'INCOME', kind: null, icon: 'bitcoin' },
+  { name: 'Stocks', type: 'INCOME', kind: null, icon: 'trending-up' },
   { name: 'Bonus', type: 'INCOME', kind: null, icon: 'gift' },
   { name: 'Freelance', type: 'INCOME', kind: null, icon: 'laptop' },
   { name: 'Business', type: 'INCOME', kind: null, icon: 'building-2' },
@@ -52,6 +58,9 @@ export const DEFAULT_CATEGORIES: readonly DefaultCategory[] = [
   { name: 'Utilities', type: 'EXPENSE', kind: 'FIXED', icon: 'zap' },
   { name: 'Family', type: 'EXPENSE', kind: 'VARIABLE', icon: 'users' },
   { name: 'Credit', type: 'EXPENSE', kind: 'FIXED', icon: 'credit-card' },
+  { name: 'Deposit', type: 'EXPENSE', kind: 'VARIABLE', icon: 'piggy-bank' },
+  { name: 'Crypto', type: 'EXPENSE', kind: 'VARIABLE', icon: 'bitcoin' },
+  { name: 'Stocks', type: 'EXPENSE', kind: 'VARIABLE', icon: 'trending-up' },
   { name: 'Subscription', type: 'EXPENSE', kind: 'FIXED', icon: 'repeat' },
   { name: 'Shopping', type: 'EXPENSE', kind: 'VARIABLE', icon: 'shopping-bag' },
   { name: 'Education', type: 'EXPENSE', kind: 'VARIABLE', icon: 'graduation-cap' },
