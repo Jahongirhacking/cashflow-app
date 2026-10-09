@@ -6,13 +6,32 @@ const optionalString = z
   .transform((value) => (value === '' ? undefined : value))
   .optional();
 
-const optionalUrl = optionalString.pipe(z.url().optional());
+/**
+ * Hosting dashboards often hand over a bare host ("api.example.com", "api-xyz.northflank.app"), a quoted
+ * value or a trailing slash. Normalise those before validating so a deploy does not fail on them.
+ */
+function normaliseUrl(value: unknown): unknown {
+  if (typeof value !== 'string') return value;
+  let v = value.trim().replace(/^['"]+|['"]+$/g, '');
+  if (v === '') return v;
+  if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(v)) v = `https://${v}`;
+  return v.replace(/\/+$/, '');
+}
+const lenientUrl = z.preprocess(normaliseUrl, z.url());
+const optionalUrl = z.preprocess(
+  normaliseUrl,
+  z
+    .string()
+    .transform((value) => (value === '' ? undefined : value))
+    .optional()
+    .pipe(z.url().optional()),
+);
 
 export const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().int().min(1).max(65535).default(3000),
-  API_PUBLIC_URL: z.url().default('http://localhost:3000'),
-  APP_WEB_URL: z.url().default('http://localhost:8081'),
+  API_PUBLIC_URL: lenientUrl.default('http://localhost:3000'),
+  APP_WEB_URL: lenientUrl.default('http://localhost:8081'),
   CORS_ORIGINS: optionalString,
 
   JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters'),
@@ -46,7 +65,16 @@ export function validateEnv(raw: Record<string, unknown>): Env {
   const result = envSchema.safeParse(raw);
   if (!result.success) {
     const problems = result.error.issues
-      .map((issue) => `  - ${issue.path.join('.') || '(root)'}: ${issue.message}`)
+      .map((issue) => {
+        const key = issue.path.join('.') || '(root)';
+        // Show the rejected value for non-secret settings so a deploy log explains itself.
+        const value = raw[key];
+        const shown =
+          /SECRET|KEY|PRIVATE/i.test(key) || typeof value !== 'string'
+            ? ''
+            : ` (received "${value.slice(0, 120)}")`;
+        return `  - ${key}: ${issue.message}${shown}`;
+      })
       .join('\n');
     throw new Error(`Invalid environment configuration:\n${problems}`);
   }
