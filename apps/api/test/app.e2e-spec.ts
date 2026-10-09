@@ -21,11 +21,16 @@ describe('API (e2e)', () => {
     await app.close();
   });
 
+  it('GET / mirrors /health for platform probes', async () => {
+    const response = await request(server).get('/').expect(200);
+    expect(response.body).toMatchObject({ status: 'ok', service: 'my-cashify-api' });
+  });
+
   it('GET /health reports ok', async () => {
     const response = await request(server).get('/health').expect(200);
     expect(response.body).toMatchObject({
       status: 'ok',
-      service: 'finance-api',
+      service: 'my-cashify-api',
       environment: 'test',
     });
   });

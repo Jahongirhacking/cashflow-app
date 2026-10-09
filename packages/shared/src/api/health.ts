@@ -1,6 +1,6 @@
 export interface HealthResponse {
   status: 'ok';
-  service: 'finance-api';
+  service: 'my-cashify-api';
   version: string;
   environment: string;
   timestamp: string;
