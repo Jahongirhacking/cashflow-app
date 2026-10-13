@@ -101,8 +101,10 @@ The web export is a single-page app (`"output": "single"` in `app.json`), so eve
 `index.html`; `apps/mobile/vercel.json` adds that rewrite (a refresh on `/login` would otherwise 404) and long
 cache headers for the hashed `_expo/` bundles.
 
-- Vercel project settings: **Root Directory** `apps/mobile`, framework "Other"; the build command and output
-  directory come from `vercel.json` (`npx expo export --platform web` → `dist`).
+- Two `vercel.json` files cover both project layouts: the repo root one (Root Directory = `/`, builds with
+  `pnpm --filter @finance/mobile exec expo export`, output `apps/mobile/dist`) and `apps/mobile/vercel.json`
+  (Root Directory = `apps/mobile`). Vercel reads the one in the configured Root Directory; framework "Other".
+- The rewrite only takes effect after a new deployment that includes the file (push to `main` or redeploy).
 - Environment variable `EXPO_PUBLIC_API_URL` = the API origin (e.g. `https://cashflow-app-gokr.onrender.com`).
   It is inlined at build time, so redeploy after changing it.
 - On the API set `APP_WEB_URL` to the Vercel URL and `COOKIE_SAME_SITE=none` (different hosts), otherwise the
