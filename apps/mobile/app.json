@@ -9,7 +9,7 @@
     "userInterfaceStyle": "automatic",
     "backgroundColor": "#0B0F14",
     "android": {
-      "package": "uz.finance.app",
+      "package": "com.jahongirhacking.my_cashflowify",
       "adaptiveIcon": {
         "backgroundColor": "#0B0F14",
         "foregroundImage": "./assets/icon.png",
@@ -48,6 +48,11 @@
     ],
     "experiments": {
       "typedRoutes": false
+    },
+    "extra": {
+      "eas": {
+        "projectId": "36332515-15e5-449c-beb1-345db7bcaca0"
+      }
     }
   }
 }
