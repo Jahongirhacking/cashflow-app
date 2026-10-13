@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "My Cashify",
-    "slug": "my-cashify",
+    "slug": "finance",
     "version": "0.1.0",
     "scheme": "finance",
     "orientation": "portrait",
