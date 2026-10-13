@@ -95,6 +95,21 @@ Redeploys: push to `main` (or trigger a build in Northflank). Logs: the service'
 `northflank logs service --project <p> --service <s>` with the CLI. The image writes structured Nest logs to
 stdout only.
 
+## Android (EAS Build)
+
+The Expo project lives in `apps/mobile`, and EAS must run with that folder as the project root. If a build logs
+`Unable to resolve module ../../App from .../node_modules/expo/AppEntry.js`, EAS ran at the monorepo root, where no
+`main: expo-router/entry` exists.
+
+- CLI: run every EAS command from the app folder — `cd apps/mobile && eas build --platform android --profile preview`.
+  EAS detects the pnpm workspace, uploads the whole repository and runs the build inside `apps/mobile`.
+- expo.dev / GitHub-connected builds: set the project's **Base directory** to `apps/mobile`.
+- Profiles are in `apps/mobile/eas.json` (`preview` = installable APK, `production` = Play Store AAB). Set
+  `EXPO_PUBLIC_API_URL` per profile (or as an EAS environment variable) to the public API origin; it is inlined
+  into the bundle at build time, exactly as for the web export.
+- The sign-in deep link uses the `finance` scheme (`apps/mobile/app.json`), which must match `AUTH_NATIVE_SCHEME`
+  on the API.
+
 ## Migrations
 
 Not applicable: there is no SQL database and no Prisma. Spreadsheet layout changes are applied idempotently by
