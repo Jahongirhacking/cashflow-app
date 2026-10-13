@@ -79,14 +79,28 @@ export class AuthFlowService {
 
       const session = this.auth.issueSession(user.id);
       setSessionCookie(res, this.config, session.accessToken, session.expiresAt);
-      return `${this.config.appWebUrl.replace(/\/$/, '')}/auth/callback`;
+      // The cookie alone is not enough when the web app and the API live on different sites
+      // (third-party cookies are blocked by many browsers), so the web app also gets a one-time
+      // code and exchanges it for a bearer token, exactly like the native app.
+      return appendParams(`${this.config.appWebUrl.replace(/\/$/, '')}/auth/callback`, {
+        code: this.auth.issueExchangeCode(user.id),
+      });
     } catch (error) {
-      this.logger.warn(`OAuth completion failed: ${(error as Error).message}`);
-      return failure(
-        error instanceof AppException && error.code === 'UNAUTHORIZED'
-          ? 'google_error'
-          : 'server_error',
+      const code = error instanceof AppException ? error.code : 'UNKNOWN';
+      this.logger.error(
+        `OAuth completion failed (${code}): ${(error as Error).message}`,
+        error instanceof Error ? error.stack : undefined,
       );
+      // Tell the app *where* it broke: Google, the server's configuration, the user registry, or unknown.
+      const reason =
+        code === 'UNAUTHORIZED'
+          ? 'google_error'
+          : code === 'CONFIGURATION_ERROR'
+            ? 'not_configured'
+            : /SPREADSHEET|GOOGLE_API/.test(code)
+              ? 'registry_error'
+              : 'server_error';
+      return failure(reason);
     }
   }
 

@@ -26,12 +26,17 @@ export default function AuthCallbackScreen() {
         router.replace('/login');
         return;
       }
+      // Web and native both arrive with a one-time code; an old-style cookie-only redirect falls
+      // back to refreshing the session. Never bounce back to "/" without a user: the protected
+      // route would land here again and loop.
+      let signedIn = false;
       if (params.code) {
-        await auth.completeNativeSignIn(params.code);
+        signedIn = await auth.completeNativeSignIn(params.code);
       } else {
-        await auth.refresh();
+        signedIn = (await auth.refresh()) !== null;
+        if (!signedIn) auth.setSignInError('session_lost');
       }
-      router.replace('/');
+      router.replace(signedIn ? '/' : '/login');
     };
     void finish();
   }, [auth, params.code, params.error, router]);

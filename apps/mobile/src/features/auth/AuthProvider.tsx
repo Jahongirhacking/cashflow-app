@@ -23,7 +23,7 @@ export interface AuthContextValue {
   /** Error message when the session could not be checked (network/server), else null. */
   lastSignInError: string | null;
   signInWithGoogle: () => Promise<void>;
-  completeNativeSignIn: (code: string) => Promise<void>;
+  completeNativeSignIn: (code: string) => Promise<boolean>;
   signOut: () => Promise<void>;
   refresh: () => Promise<CurrentUser | null>;
   setSignInError: (reason: string | null) => void;
@@ -62,16 +62,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const setSignInError = useCallback((reason: string | null) => setSignInErrorState(reason), []);
 
+  /** Trades the one-time code from the OAuth redirect (deep link or web callback) for a session. */
   const completeNativeSignIn = useCallback(
-    async (code: string) => {
+    async (code: string): Promise<boolean> => {
       setBusy(true);
       try {
         const session = await exchangeNativeCode(code);
         if (session.accessToken) await tokenStore.set(session.accessToken);
         queryClient.setQueryData(queryKeys.auth.me, session.user);
         setSignInErrorState(null);
+        return true;
       } catch {
         setSignInErrorState('server_error');
+        return false;
       } finally {
         setBusy(false);
       }

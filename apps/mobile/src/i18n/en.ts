@@ -86,6 +86,10 @@ export const en = {
   'auth.error.invalid_state': 'The sign-in link expired. Please try again.',
   'auth.error.google_error': 'Google sign-in failed. Please try again.',
   'auth.error.server_error': 'Something went wrong on our side. Please try again.',
+  'auth.error.registry_error':
+    'Signed in with Google, but the server could not save your account: its user registry spreadsheet is not accessible. The administrator must share it with the service account (Editor) or switch to the file store.',
+  'auth.error.session_lost':
+    'Google sign-in finished, but the browser did not keep the session. Please try again; if it keeps happening, allow cookies for this site.',
   'auth.error.not_configured': 'Google sign-in is not configured on the server yet.',
   'auth.cannotReach.title': "Can't reach My Cashify",
   'auth.cannotReach.body':

@@ -83,6 +83,10 @@ export const uz: Record<TranslationKey, string> = {
   'auth.error.invalid_state': 'Kirish havolasi eskirgan. Qayta urinib ko‘ring.',
   'auth.error.google_error': 'Google orqali kirish amalga oshmadi. Qayta urinib ko‘ring.',
   'auth.error.server_error': 'Bizning tomonda xatolik yuz berdi. Qayta urinib ko‘ring.',
+  'auth.error.registry_error':
+    "Google orqali kirdingiz, lekin server hisobingizni saqlay olmadi: foydalanuvchilar jadvaliga kirish yo'q. Administrator uni xizmat hisobi bilan (Muharrir) ulashishi yoki fayl saqlashga o'tishi kerak.",
+  'auth.error.session_lost':
+    "Google orqali kirish yakunlandi, lekin brauzer sessiyani saqlamadi. Qayta urinib ko'ring; takrorlansa, bu sayt uchun cookie-larga ruxsat bering.",
   'auth.error.not_configured': 'Serverda Google orqali kirish hali sozlanmagan.',
   'auth.cannotReach.title': "My Cashify bilan bog'lanib bo'lmadi",
   'auth.cannotReach.body':

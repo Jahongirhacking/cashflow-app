@@ -74,7 +74,15 @@ describe('Auth (e2e)', () => {
       .get(`/auth/google/callback?code=abc&state=${encodeURIComponent(state)}`)
       .set('Cookie', nonceCookie)
       .expect(302);
-    expect(callback.headers.location).toBe('http://localhost:8081/auth/callback');
+    const location = String(callback.headers.location);
+    expect(location).toMatch(/^http:\/\/localhost:8081\/auth\/callback\?code=.+/);
+    // the same code works for a cookie-less web client
+    const webCode = new URL(location).searchParams.get('code') as string;
+    const exchangedWeb = await request(server)
+      .post('/auth/exchange')
+      .send({ code: webCode })
+      .expect(200);
+    expect((exchangedWeb.body as { accessToken: string }).accessToken).toBeTruthy();
     const sessionCookie = (callback.headers['set-cookie'] as unknown as string[])
       .map((c) => c.split(';')[0] as string)
       .find((c) => c.startsWith('finance_session='));

@@ -50,6 +50,8 @@ const SIGN_IN_ERROR_KEYS: Record<string, TranslationKey> = {
   google_error: 'auth.error.google_error',
   server_error: 'auth.error.server_error',
   not_configured: 'auth.error.not_configured',
+  registry_error: 'auth.error.registry_error',
+  session_lost: 'auth.error.session_lost',
 };
 
 export function signInErrorKey(reason: string | null | undefined): TranslationKey | null {
