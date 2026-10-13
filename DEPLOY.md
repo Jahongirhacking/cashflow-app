@@ -95,6 +95,27 @@ Redeploys: push to `main` (or trigger a build in Northflank). Logs: the service'
 `northflank logs service --project <p> --service <s>` with the CLI. The image writes structured Nest logs to
 stdout only.
 
+## Web app on Vercel
+
+The web export is a single-page app (`"output": "single"` in `app.json`), so every route must be served by
+`index.html`; `apps/mobile/vercel.json` adds that rewrite (a refresh on `/login` would otherwise 404) and long
+cache headers for the hashed `_expo/` bundles.
+
+- Vercel project settings: **Root Directory** `apps/mobile`, framework "Other"; the build command and output
+  directory come from `vercel.json` (`npx expo export --platform web` → `dist`).
+- Environment variable `EXPO_PUBLIC_API_URL` = the API origin (e.g. `https://cashflow-app-gokr.onrender.com`).
+  It is inlined at build time, so redeploy after changing it.
+- On the API set `APP_WEB_URL` to the Vercel URL and `COOKIE_SAME_SITE=none` (different hosts), otherwise the
+  session cookie is not accepted by the browser.
+
+## Google OAuth settings
+
+Authorised redirect URI in Google Cloud Console (OAuth client → Web application):
+`${API_PUBLIC_URL}/auth/google/callback`, e.g. `https://cashflow-app-gokr.onrender.com/auth/google/callback`.
+Set the same value as `GOOGLE_OAUTH_REDIRECT_URI` on the API (or just `API_PUBLIC_URL`, from which it is derived).
+A "Missing required parameter: redirect_uri" error from Google means the API was started without either value.
+Android sign-in additionally needs `AUTH_NATIVE_SCHEME=finance` on the API (the app's deep-link scheme).
+
 ## Android (EAS Build)
 
 The Expo project lives in `apps/mobile`, and EAS must run with that folder as the project root. If a build logs
