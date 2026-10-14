@@ -5,4 +5,6 @@ export interface HealthResponse {
   environment: string;
   timestamp: string;
   uptimeSeconds: number;
+  /** Deployed git commit when the host exposes it (RENDER_GIT_COMMIT, NF_GIT_COMMIT, GIT_COMMIT). */
+  commit: string | null;
 }

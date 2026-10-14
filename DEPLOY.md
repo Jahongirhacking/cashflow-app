@@ -134,8 +134,11 @@ One-time Google Cloud setup (same project as the OAuth consent screen):
 2. Get the signing certificate fingerprint of the EAS keystore: `cd apps/mobile && eas credentials -p android`
    → _production_ keystore → copy the **SHA-1**.
 3. Credentials → _Create credentials_ → _OAuth client ID_ → **Android**: package name
-   `com.jahongirhacking.my_cashflowify`, the SHA-1 from step 2. Copy the client id
-   (`…apps.googleusercontent.com`). Android clients have no secret and need no redirect URI entry.
+   `com.jahongirhacking.my_cashflowify`, the SHA-1 from step 2. Open the client's **Advanced settings** and
+   turn on **Enable custom URI scheme** (off by default; without it Google answers "Access blocked: request is
+   invalid — Custom URI scheme is not enabled for your Android client"). Copy the client id
+   (`…apps.googleusercontent.com`). Android clients have no secret and need no redirect URI entry; the app
+   redirects to `com.googleusercontent.apps.<client id>:/oauth2redirect`.
 4. Add `"EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID": "<client id>"` to `build.base.env` in `apps/mobile/eas.json` (it is public; EAS rejects an empty value, which is why it is absent by default) or set it as an
    EAS environment variable, and rebuild (`eas build -p android --profile preview`). `app.config.ts` registers
    Google's redirect scheme (`com.googleusercontent.apps.<id>`) automatically from that variable.

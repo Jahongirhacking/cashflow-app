@@ -21,6 +21,12 @@ export class HealthController {
       environment: this.config.nodeEnv,
       timestamp: new Date().toISOString(),
       uptimeSeconds: Math.round((Date.now() - this.startedAt) / 1000),
+      // Render / Northflank / generic CI expose the deployed commit; null when run locally.
+      commit:
+        process.env.RENDER_GIT_COMMIT ??
+        process.env.NF_GIT_COMMIT ??
+        process.env.GIT_COMMIT ??
+        null,
     };
   }
 

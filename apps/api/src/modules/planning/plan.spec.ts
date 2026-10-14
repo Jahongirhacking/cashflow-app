@@ -167,6 +167,119 @@ describe('buildMonthPlan', () => {
     expect(plan.fixed.dueTotal).toBe(3_760_000);
   });
 
+  describe('immediate tranche safety', () => {
+    // 18 days left, 1,410,285 cash, 3.8M fixed due on the 18th, 21.454M salary on the 30th,
+    // ~24M living costs last month: nothing is safe today, a tranche appears only after payday.
+    const today = '2026-10-14';
+    const salary = occ({
+      ruleId: 'sal',
+      name: 'Oylik',
+      type: 'INCOME',
+      amount: 21_454_000,
+      dueDate: '2026-10-30',
+      status: 'expected',
+    });
+    const kia = occ({
+      ruleId: 'kia',
+      name: 'Kia',
+      amount: 3_800_000,
+      dueDate: '2026-10-18',
+      status: 'due',
+    });
+    const lastMonth = [
+      tx({ name: 'Ovqat', amount: 2_500_000, date: '2026-09-10', category: 'Food' }),
+      tx({ name: 'Oila', amount: 1_000_000, date: '2026-09-12', category: 'Family' }),
+      tx({ name: 'Bozor', amount: 580_000, date: '2026-09-15', category: 'Shopping' }),
+    ];
+
+    it('never recommends more than the cash on hand and returns zero when the buffer would be breached', () => {
+      const plan = buildMonthPlan({
+        month: '2026-10',
+        today,
+        occurrences: [kia, salary],
+        transactions: lastMonth,
+        cash: 1_410_285,
+        annualRatePercent: 20,
+      });
+      expect(plan.cashOnHand).toBe(1_410_285);
+      expect(plan.investableNow).toBe(0);
+      expect(plan.recommendations.filter((r) => r.reason === 'free-now')).toHaveLength(0);
+      // the conservative projection goes negative before payday → warning, no "now" money
+      expect(plan.floor?.balance).toBeLessThan(0);
+      expect(plan.warnings.some((w) => w.code === 'negative-balance')).toBe(true);
+      // but once the salary arrives, a tranche is unlocked from that date on
+      const later = plan.recommendations.find((r) => r.reason === 'after-income');
+      expect(later?.date).toBe('2026-10-30');
+      expect(later?.incomeName).toBe('Oylik');
+      expect(later?.amount ?? 0).toBeGreaterThan(0);
+      expect(later?.amount ?? 0).toBeLessThanOrEqual(21_454_000);
+    });
+
+    it('does not count expected income as cash available today', () => {
+      const rich = buildMonthPlan({
+        month: '2026-10',
+        today,
+        occurrences: [salary], // no fixed payments, no living-cost history
+        transactions: [],
+        cash: 5_000_000,
+        annualRatePercent: 20,
+      });
+      // all 5M is free today (no history → zero budget and buffer), nothing from the salary
+      expect(rich.investableNow).toBe(5_000_000);
+      expect(rich.recommendations[0]).toMatchObject({
+        date: today,
+        amount: 5_000_000,
+        reason: 'free-now',
+      });
+      // the after-salary tranche is the salary itself, never the salary plus the cash again
+      expect(rich.recommendations[1]).toMatchObject({ date: '2026-10-30', amount: 21_454_000 });
+      expect(rich.recommendations.reduce((s, r) => s + r.amount, 0)).toBe(26_454_000);
+    });
+
+    it('keeps the buffer and the remaining living costs out of the immediate tranche', () => {
+      const plan = buildMonthPlan({
+        month: '2026-10',
+        today,
+        occurrences: [kia],
+        transactions: lastMonth,
+        cash: 10_000_000,
+        annualRatePercent: 20,
+      });
+      // 10,000,000 − 3,800,000 (Kia) − 4,080,000 (living budget) − 408,000 (10% buffer) = 1,712,000
+      expect(plan.variable.budget).toBe(4_080_000);
+      expect(plan.buffer).toBe(408_000);
+      expect(plan.investableNow).toBe(1_712_000);
+      expect(plan.investableNow).toBeLessThanOrEqual(plan.cashOnHand);
+    });
+
+    it('already-paid fixed expenses and already-spent living costs are not subtracted twice', () => {
+      const paidKia = occ({ ...kia, status: 'paid', transactionId: 'txn_kia' });
+      const plan = buildMonthPlan({
+        month: '2026-10',
+        today,
+        occurrences: [paidKia],
+        transactions: [
+          ...lastMonth,
+          tx({
+            name: 'Kia',
+            amount: 3_800_000,
+            date: '2026-10-05',
+            category: 'Credit',
+            recurringRuleId: 'kia',
+          }),
+          tx({ name: 'Ovqat', amount: 1_000_000, date: '2026-10-06', category: 'Food' }),
+        ],
+        cash: 10_000_000,
+        annualRatePercent: 20,
+      });
+      expect(plan.fixed.dueTotal).toBe(0);
+      expect(plan.variable.spent).toBe(1_000_000);
+      expect(plan.variable.remaining).toBe(3_080_000);
+      // 10,000,000 − 3,080,000 (what is still left to spend) − 408,000 buffer
+      expect(plan.investableNow).toBe(6_512_000);
+    });
+  });
+
   it('recommends investing what the balance never needs, in dated tranches', () => {
     const plan = buildMonthPlan({
       month: '2026-10',

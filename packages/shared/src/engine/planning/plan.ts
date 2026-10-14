@@ -165,7 +165,10 @@ export function buildMonthPlan(input: PlanInput): MonthPlan {
   // Later tranches: unlocked by each expected inflow, sized by the balance floor from that date on.
   const recommendations: PlanRecommendation[] = [];
   const roundDown = (n: number) => Math.floor(Math.max(0, n) / 1000) * 1000;
-  const nowAmount = roundDown(Math.min(...conservative) - buffer);
+  // Money that can leave today: the lowest point of the no-new-income projection (fixed payments and
+  // the living-cost budget already subtracted), minus the buffer, and never more than the cash itself.
+  // Expected salaries/advances are deliberately absent here; they only unlock later tranches below.
+  const nowAmount = roundDown(Math.min(cashOnHand, Math.min(...conservative)) - buffer);
   if (nowAmount > 0) {
     recommendations.push({
       date: start,
