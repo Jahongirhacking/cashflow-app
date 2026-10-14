@@ -2,7 +2,7 @@ import { baseConfig } from '@finance/config/eslint/base.mjs';
 import tseslint from 'typescript-eslint';
 
 export default [
-  { ignores: ['dist/**', 'node_modules/**', 'coverage/**', 'data/**'] },
+  { ignores: ['dist/**', 'node_modules/**', 'coverage/**', 'data/**', 'dist-harness/**'] },
   ...baseConfig,
   {
     files: ['**/*.ts'],
