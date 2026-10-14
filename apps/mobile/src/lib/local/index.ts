@@ -16,7 +16,7 @@ const localUsers: LocalUserStore = {
   async current(): Promise<User | null> {
     const profile = await googleDirect.getProfile();
     if (!profile || !(await googleDirect.hasSession())) return null;
-    const connection = await connectionStore.load();
+    const connection = await connectionStore.load(profile.googleId);
     return {
       id: `usr_${profile.googleId}`,
       googleId: profile.googleId,
@@ -31,7 +31,9 @@ const localUsers: LocalUserStore = {
     };
   },
   async setSpreadsheet(_userId, connection) {
-    await connectionStore.save(connection);
+    const profile = await googleDirect.getProfile();
+    if (!profile) throw new Error('Not signed in');
+    await connectionStore.save(profile.googleId, connection);
     const user = await this.current();
     if (!user) throw new Error('Not signed in');
     return user;

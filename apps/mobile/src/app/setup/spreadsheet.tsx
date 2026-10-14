@@ -27,7 +27,7 @@ export default function SpreadsheetSetupScreen() {
     if (reconnect) return;
     let cancelled = false;
     (async () => {
-      const saved = await connectionStore.load();
+      const saved = auth.user ? await connectionStore.load(auth.user.id) : null;
       if (!saved || cancelled) {
         setRestoring(false);
         return;

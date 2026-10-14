@@ -60,8 +60,8 @@ function useApplyStatus() {
         hasSpreadsheet: status.connected,
       });
     }
-    if (status.connected && status.spreadsheetId) {
-      void connectionStore.save({
+    if (status.connected && status.spreadsheetId && auth.user) {
+      void connectionStore.save(auth.user.id, {
         spreadsheetId: status.spreadsheetId,
         spreadsheetName: status.spreadsheetName ?? '',
         verifiedAt: status.lastVerifiedAt ?? new Date().toISOString(),

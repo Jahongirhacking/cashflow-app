@@ -89,6 +89,7 @@ function RootNavigator() {
           <Stack.Screen name="(auth)" />
         </Stack.Protected>
         <Stack.Screen name="auth/callback" />
+        <Stack.Screen name="oauth2redirect" />
         <Stack.Screen name="+not-found" options={{ title: t('notFound.title') }} />
       </Stack>
     </>
