@@ -6,8 +6,7 @@
   "build": {
     "base": {
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://cashflow-app-gokr.onrender.com",
-        "EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID": ""
+        "EXPO_PUBLIC_API_URL": "https://cashflow-app-gokr.onrender.com"
       }
     },
     "development": {
