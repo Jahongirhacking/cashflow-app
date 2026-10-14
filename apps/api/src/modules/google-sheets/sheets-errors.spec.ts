@@ -1,4 +1,4 @@
-import { describeGoogleError, mapGoogleError } from './sheets-errors';
+import { describeGoogleError, mapGoogleError } from '@finance/shared';
 
 function googleError(status: number, message: string, reason?: string) {
   return {
@@ -22,7 +22,7 @@ describe('mapGoogleError', () => {
       ),
     );
     expect(byMessage.code).toBe('CONFIGURATION_ERROR');
-    expect(byMessage.getStatus()).toBe(503);
+    expect(byMessage.statusCode).toBe(503);
   });
 
   it('maps a plain 403 to access denied and 404 to not found', () => {

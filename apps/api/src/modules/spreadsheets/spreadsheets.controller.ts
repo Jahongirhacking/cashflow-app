@@ -8,7 +8,7 @@ import {
 } from '@finance/shared';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { SpreadsheetService } from './spreadsheet.service';
+import { SpreadsheetService } from '@finance/shared';
 
 @Controller('spreadsheets')
 export class SpreadsheetsController {

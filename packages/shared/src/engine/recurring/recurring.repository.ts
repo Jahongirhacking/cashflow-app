@@ -1,9 +1,8 @@
-import { Injectable } from '@nestjs/common';
-import type { RecurringRule } from '@finance/shared';
-import { TtlCache } from '../../common/cache/ttl-cache';
-import { AppException } from '../../common/errors/app.exception';
+import type { RecurringRule } from '../../core';
+import { TtlCache } from '../cache/ttl-cache';
+import { AppError } from '../errors/app-error';
 import { a1 } from '../google-sheets/a1';
-import { type CellValue, SheetsClient } from '../google-sheets/sheets-client';
+import { type CellValue, type SheetsClient } from '../google-sheets/sheets-client';
 import { RECURRING_HEADERS } from '../spreadsheets/sheet-layout';
 import type { SpreadsheetContext } from '../spreadsheets/spreadsheet-context';
 import { parseCellDate } from '../transactions/cell-parsers';
@@ -19,7 +18,6 @@ interface Table {
 }
 
 /** Recurring rules sheet: ID | Name | Amount | Type | Category | Payment | Frequency | Day | Month | Start | End | Active | Note | Created | Updated */
-@Injectable()
 export class RecurringRepository {
   private readonly cache = new TtlCache();
 
@@ -42,7 +40,7 @@ export class RecurringRepository {
   async update(ctx: SpreadsheetContext, rule: RecurringRule): Promise<RecurringRule> {
     const table = await this.table(ctx, rule.userId);
     const row = table.rowById.get(rule.id);
-    if (!row) throw AppException.notFound('Recurring rule');
+    if (!row) throw AppError.notFound('Recurring rule');
     await this.client.updateValues(ctx.spreadsheetId, a1(SHEET, 1, row, WIDTH, row), [
       toCells(rule),
     ]);
@@ -53,9 +51,9 @@ export class RecurringRepository {
   async remove(ctx: SpreadsheetContext, userId: string, id: string): Promise<void> {
     const table = await this.table(ctx, userId);
     const row = table.rowById.get(id);
-    if (!row) throw AppException.notFound('Recurring rule');
+    if (!row) throw AppError.notFound('Recurring rule');
     const sheet = ctx.sheets.get(SHEET);
-    if (!sheet) throw new AppException('GOOGLE_API_ERROR', 'Recurring sheet is missing');
+    if (!sheet) throw new AppError('GOOGLE_API_ERROR', 'Recurring sheet is missing');
     await this.client.deleteRows(ctx.spreadsheetId, sheet.sheetId, row, row);
     this.cache.invalidate(this.key(ctx));
   }

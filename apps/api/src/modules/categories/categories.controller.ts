@@ -9,7 +9,7 @@ import {
 } from '@finance/shared';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { CategoriesService } from './categories.service';
+import { CategoriesService } from '@finance/shared';
 
 @Controller('categories')
 export class CategoriesController {

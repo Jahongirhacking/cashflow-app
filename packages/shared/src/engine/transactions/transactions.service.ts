@@ -1,4 +1,3 @@
-import { Injectable } from '@nestjs/common';
 import {
   type BulkTransactionAction,
   type BulkTransactionResult,
@@ -14,12 +13,11 @@ import {
   type TransactionType,
   type UpdateTransactionInput,
   type User,
-} from '@finance/shared';
-import { AppException } from '../../common/errors/app.exception';
-import { SpreadsheetService } from '../spreadsheets/spreadsheet.service';
-import { TransactionsRepository } from './transactions.repository';
+} from '../../core';
+import { AppError } from '../errors/app-error';
+import { type SpreadsheetService } from '../spreadsheets/spreadsheet.service';
+import { type TransactionsRepository } from './transactions.repository';
 
-@Injectable()
 export class TransactionsService {
   constructor(
     private readonly spreadsheets: SpreadsheetService,
@@ -103,7 +101,7 @@ export class TransactionsService {
   async getById(user: User, id: string): Promise<Transaction> {
     const ctx = await this.spreadsheets.getContext(user);
     const transaction = await this.repo.findById(ctx, user.id, id);
-    if (!transaction) throw AppException.notFound('Transaction');
+    if (!transaction) throw AppError.notFound('Transaction');
     return transaction;
   }
 

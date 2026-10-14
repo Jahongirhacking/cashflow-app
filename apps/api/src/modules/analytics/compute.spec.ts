@@ -9,7 +9,7 @@ import {
   projectMonthlySavings,
   spendingTrend,
   summarise,
-} from './compute';
+} from '@finance/shared';
 
 let n = 0;
 function tx(p: Partial<Transaction>): Transaction {

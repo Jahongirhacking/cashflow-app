@@ -1,5 +1,5 @@
-import { toIsoDate, toIsoTime } from '@finance/shared';
-import type { PaymentMethod } from '@finance/shared';
+import { toIsoDate, toIsoTime } from '../../core';
+import type { PaymentMethod } from '../../core';
 import type { CellValue } from '../google-sheets/sheets-client';
 
 const SERIAL_EPOCH_MS = Date.UTC(1899, 11, 30);

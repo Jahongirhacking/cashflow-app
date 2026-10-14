@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { consoleLogger } from '../logger';
 import {
   buildSpreadsheetUrl,
   CATEGORY_SEED_VERSION,
@@ -9,18 +9,16 @@ import {
   type SpreadsheetInfo,
   type SpreadsheetStatus,
   type User,
-} from '@finance/shared';
-import { TtlCache } from '../../common/cache/ttl-cache';
-import { AppException } from '../../common/errors/app.exception';
-import { AppConfigService } from '../../config/app-config.service';
+} from '../../core';
+import { TtlCache } from '../cache/ttl-cache';
+import { AppError } from '../errors/app-error';
 import { a1, columnLetter } from '../google-sheets/a1';
 import {
   type CellValue,
-  SheetsClient,
+  type SheetsClient,
   type SheetProperties,
   type SpreadsheetMeta,
 } from '../google-sheets/sheets-client';
-import { UsersService } from '../users/users.service';
 import { SettingsStore, SETTING_KEYS, SCHEMA_VERSION } from './settings-store';
 import {
   APP_BLOCK_HEADERS,
@@ -39,6 +37,22 @@ import {
 } from './sheet-layout';
 import type { SpreadsheetContext } from './spreadsheet-context';
 
+/** What the engine needs to know about its host; the API maps its env to this, the app hard-codes it. */
+export interface SpreadsheetEngineConfig {
+  /** False when no credential can reach Google Sheets (the API without a service account). */
+  canAccessSheets: boolean;
+  /** Email the user must share the sheet with (service-account mode), null for user-token mode. */
+  serviceAccountEmail: string | null;
+}
+
+/** Where the user ↔ spreadsheet link is persisted (users registry on the API, local storage in the app). */
+export interface UsersPort {
+  setSpreadsheet(
+    userId: string,
+    connection: { spreadsheetId: string; spreadsheetName: string; verifiedAt: string },
+  ): Promise<User>;
+}
+
 const CONTEXT_TTL_MS = 5 * 60_000;
 const HEADER_SCAN_COLUMNS = 60;
 
@@ -46,24 +60,23 @@ const HEADER_SCAN_COLUMNS = 60;
  * Owns the user ↔ spreadsheet relationship: connection, access verification,
  * one-time initialisation of the required sheets and the per-spreadsheet context cache.
  */
-@Injectable()
 export class SpreadsheetService {
-  private readonly logger = new Logger(SpreadsheetService.name);
+  private readonly logger = consoleLogger('SpreadsheetService');
   private readonly cache = new TtlCache();
 
   constructor(
     private readonly client: SheetsClient,
-    private readonly users: UsersService,
-    private readonly config: AppConfigService,
+    private readonly users: UsersPort,
+    private readonly config: SpreadsheetEngineConfig,
   ) {}
 
   async connect(user: User, spreadsheetUrl: string): Promise<SpreadsheetStatus> {
     const spreadsheetId = extractSpreadsheetId(spreadsheetUrl);
     if (!spreadsheetId) {
-      throw new AppException('SPREADSHEET_INVALID_URL', 'This is not a valid Google Sheets URL.');
+      throw new AppError('SPREADSHEET_INVALID_URL', 'This is not a valid Google Sheets URL.');
     }
-    if (!this.config.googleServiceAccount && this.config.sheetsBackend !== 'memory') {
-      throw AppException.configuration('Spreadsheet access is not configured on the server.');
+    if (!this.config.canAccessSheets) {
+      throw AppError.configuration('Spreadsheet access is not configured on the server.');
     }
     const meta = await this.client.getSpreadsheet(spreadsheetId);
     await this.initialize(meta);
@@ -94,10 +107,10 @@ export class SpreadsheetService {
       });
       return this.toStatus(updated, 'OK');
     } catch (error) {
-      if (error instanceof AppException && error.code === 'SPREADSHEET_ACCESS_DENIED') {
+      if (error instanceof AppError && error.code === 'SPREADSHEET_ACCESS_DENIED') {
         return this.toStatus(user, 'ACCESS_DENIED');
       }
-      if (error instanceof AppException && error.code === 'SPREADSHEET_NOT_FOUND') {
+      if (error instanceof AppError && error.code === 'SPREADSHEET_NOT_FOUND') {
         return this.toStatus(user, 'NOT_FOUND');
       }
       throw error;
@@ -128,7 +141,7 @@ export class SpreadsheetService {
   getContext(user: User): Promise<SpreadsheetContext> {
     const spreadsheetId = user.spreadsheetId;
     if (!spreadsheetId) {
-      throw new AppException(
+      throw new AppError(
         'SPREADSHEET_NOT_CONNECTED',
         'Connect your Google Spreadsheet to continue.',
       );
@@ -190,7 +203,7 @@ export class SpreadsheetService {
     const appColumn = Number(values.get(SETTING_KEYS.transactionsAppColumn));
     const format = values.get(SETTING_KEYS.transactionsFormat) === 'legacy' ? 'legacy' : 'app';
     if (!sheet || !Number.isInteger(appColumn)) {
-      throw new AppException('GOOGLE_API_ERROR', 'The spreadsheet could not be initialised.');
+      throw new AppError('GOOGLE_API_ERROR', 'The spreadsheet could not be initialised.');
     }
     return {
       spreadsheetId,
@@ -358,9 +371,7 @@ export class SpreadsheetService {
       spreadsheetName: user.spreadsheetName,
       spreadsheetUrl: user.spreadsheetId ? buildSpreadsheetUrl(user.spreadsheetId) : null,
       lastVerifiedAt: user.spreadsheetVerifiedAt,
-      serviceAccountEmail:
-        this.config.serviceAccountEmail ??
-        (this.config.sheetsBackend === 'memory' ? 'demo-bot@finance.local' : null),
+      serviceAccountEmail: this.config.serviceAccountEmail,
     };
   }
 }

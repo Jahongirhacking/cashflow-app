@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import type { ExportCategoryMap, ExportCategorySettings, User } from '@finance/shared';
-import { CategoriesRepository } from '../../categories/categories.repository';
-import { SheetsClient } from '../../google-sheets/sheets-client';
-import { SettingsStore } from '../../spreadsheets/settings-store';
-import { SpreadsheetService } from '../../spreadsheets/spreadsheet.service';
-import { TransactionsRepository } from '../transactions.repository';
+import { CategoriesRepository } from '@finance/shared';
+import { SheetsClient } from '@finance/shared';
+import { SettingsStore } from '@finance/shared';
+import { SpreadsheetService } from '@finance/shared';
+import { TransactionsRepository } from '@finance/shared';
 import { buildTransactionsWorkbook } from './xlsx-export';
 
 const EXPORT_MAP_KEY = 'export.categoryMap';

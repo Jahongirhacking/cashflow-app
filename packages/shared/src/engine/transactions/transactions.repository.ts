@@ -1,9 +1,8 @@
-import { Injectable } from '@nestjs/common';
-import { generateId, type Transaction } from '@finance/shared';
-import { TtlCache } from '../../common/cache/ttl-cache';
-import { AppException } from '../../common/errors/app.exception';
+import { generateId, type Transaction } from '../../core';
+import { TtlCache } from '../cache/ttl-cache';
+import { AppError } from '../errors/app-error';
 import { a1 } from '../google-sheets/a1';
-import { type CellValue, SheetsClient } from '../google-sheets/sheets-client';
+import { type CellValue, type SheetsClient } from '../google-sheets/sheets-client';
 import { APP_BLOCK_WIDTH, LEGACY_DATA_WIDTH } from '../spreadsheets/sheet-layout';
 import type { SpreadsheetContext } from '../spreadsheets/spreadsheet-context';
 import { TransactionRowAdapter } from './transaction-row.adapter';
@@ -22,7 +21,6 @@ export interface TransactionTable {
  * Reads and writes transactions in the user's spreadsheet.
  * The whole table is read in one request and cached briefly; every write invalidates it.
  */
-@Injectable()
 export class TransactionsRepository {
   private readonly cache = new TtlCache();
 
@@ -74,7 +72,7 @@ export class TransactionsRepository {
   async update(ctx: SpreadsheetContext, transaction: Transaction): Promise<Transaction> {
     const table = await this.getTable(ctx, transaction.userId);
     const row = table.rowById.get(transaction.id);
-    if (!row) throw AppException.notFound('Transaction');
+    if (!row) throw AppError.notFound('Transaction');
     await this.writeRow(ctx, row, transaction);
     this.cache.invalidate(this.key(ctx));
     return transaction;
@@ -145,7 +143,7 @@ export class TransactionsRepository {
   async remove(ctx: SpreadsheetContext, userId: string, id: string): Promise<void> {
     const table = await this.getTable(ctx, userId);
     const row = table.rowById.get(id);
-    if (!row) throw AppException.notFound('Transaction');
+    if (!row) throw AppError.notFound('Transaction');
     const { sheetTitle, sheetId, format, columns } = ctx.transactions;
     if (format === 'app') {
       await this.client.deleteRows(ctx.spreadsheetId, sheetId, row, row);

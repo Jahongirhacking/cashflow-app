@@ -1,4 +1,4 @@
-import { a1, columnIndex, columnLetter, parseA1 } from './a1';
+import { a1, columnIndex, columnLetter, parseA1 } from '@finance/shared';
 
 describe('A1 helpers', () => {
   it('converts column indexes', () => {

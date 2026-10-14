@@ -1,7 +1,7 @@
 import path from 'node:path';
 import { Logger, Module } from '@nestjs/common';
 import { AppConfigService } from '../../config/app-config.service';
-import { SheetsClient } from '../google-sheets/sheets-client';
+import { SheetsClient } from '@finance/shared';
 import { FileUsersRepository } from './file-users.repository';
 import { SheetsUsersRepository } from './sheets-users.repository';
 import { UsersRepository } from './users.repository';

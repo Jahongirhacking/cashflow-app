@@ -3,7 +3,7 @@ import { currentMonthKey, type MonthPlan, type User } from '@finance/shared';
 import { z } from 'zod';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { PlanningService } from './planning.service';
+import { PlanningService } from '@finance/shared';
 
 const querySchema = z.object({
   month: z

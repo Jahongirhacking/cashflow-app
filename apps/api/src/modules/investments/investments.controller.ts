@@ -1,7 +1,7 @@
 import { Controller, Get } from '@nestjs/common';
 import type { InvestmentsOverview, User } from '@finance/shared';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { InvestmentsService } from './investments.service';
+import { InvestmentsService } from '@finance/shared';
 
 @Controller('investments')
 export class InvestmentsController {

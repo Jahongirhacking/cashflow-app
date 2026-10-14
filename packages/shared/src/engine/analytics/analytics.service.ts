@@ -1,4 +1,3 @@
-import { Injectable } from '@nestjs/common';
 import {
   type AnalyticsOverview,
   type AnalyticsPeriod,
@@ -10,10 +9,10 @@ import {
   todayIsoDate,
   type Transaction,
   type User,
-} from '@finance/shared';
-import { CategoriesRepository } from '../categories/categories.repository';
-import { SpreadsheetService } from '../spreadsheets/spreadsheet.service';
-import { TransactionsService } from '../transactions/transactions.service';
+} from '../../core';
+import { type CategoriesRepository } from '../categories/categories.repository';
+import { type SpreadsheetService } from '../spreadsheets/spreadsheet.service';
+import { type TransactionsService } from '../transactions/transactions.service';
 import {
   buildInsights,
   categoryBreakdown,
@@ -35,7 +34,6 @@ interface Dataset {
   today: string;
 }
 
-@Injectable()
 export class AnalyticsService {
   constructor(
     private readonly spreadsheets: SpreadsheetService,

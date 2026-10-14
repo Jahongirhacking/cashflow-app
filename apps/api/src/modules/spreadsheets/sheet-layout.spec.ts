@@ -2,7 +2,7 @@ import {
   chooseAppBlockColumn,
   findAppBlockColumn,
   isLegacyTransactionsHeader,
-} from './sheet-layout';
+} from '@finance/shared';
 
 describe('sheet layout detection', () => {
   it('recognises the legacy Uzbek header', () => {

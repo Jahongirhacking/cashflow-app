@@ -1,16 +1,14 @@
-import { Injectable } from '@nestjs/common';
 import {
   type Category,
   type CreateCategoryInput,
   generateId,
   type UpdateCategoryInput,
   type User,
-} from '@finance/shared';
-import { AppException } from '../../common/errors/app.exception';
-import { SpreadsheetService } from '../spreadsheets/spreadsheet.service';
-import { CategoriesRepository } from './categories.repository';
+} from '../../core';
+import { AppError } from '../errors/app-error';
+import { type SpreadsheetService } from '../spreadsheets/spreadsheet.service';
+import { type CategoriesRepository } from './categories.repository';
 
-@Injectable()
 export class CategoriesService {
   constructor(
     private readonly spreadsheets: SpreadsheetService,
@@ -31,7 +29,7 @@ export class CategoriesService {
         (c) => c.type === input.type && c.name.toLowerCase() === input.name.toLowerCase(),
       )
     ) {
-      throw new AppException(
+      throw new AppError(
         'CONFLICT',
         `A ${input.type.toLowerCase()} category named "${input.name}" already exists.`,
       );
@@ -54,7 +52,7 @@ export class CategoriesService {
   async update(user: User, id: string, patch: UpdateCategoryInput): Promise<Category> {
     const ctx = await this.spreadsheets.getContext(user);
     const existing = (await this.repo.list(ctx, user.id)).find((c) => c.id === id);
-    if (!existing) throw AppException.notFound('Category');
+    if (!existing) throw AppError.notFound('Category');
     const updated: Category = {
       ...existing,
       name: patch.name ?? existing.name,

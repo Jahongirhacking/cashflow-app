@@ -1,10 +1,4 @@
-import {
-  type AnalyticsPeriod,
-  daysInMonth,
-  diffDays,
-  shiftMonthKey,
-  addDays,
-} from '@finance/shared';
+import { type AnalyticsPeriod, daysInMonth, diffDays, shiftMonthKey, addDays } from '../../core';
 
 export interface ResolvedPeriod {
   period: AnalyticsPeriod;

@@ -11,7 +11,7 @@ import {
 import { z } from 'zod';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { AnalyticsService } from './analytics.service';
+import { AnalyticsService } from '@finance/shared';
 
 const periodSchema = z.object({ period: z.enum(ANALYTICS_PERIODS).default('month') });
 const monthsSchema = z.object({ months: z.coerce.number().int().min(1).max(36).default(6) });

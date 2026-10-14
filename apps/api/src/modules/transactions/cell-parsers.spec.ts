@@ -4,7 +4,7 @@ import {
   parseCellPayment,
   parseCellTime,
   serialToIsoDate,
-} from './cell-parsers';
+} from '@finance/shared';
 
 describe('cell parsers', () => {
   it('parses Google date serials', () => {

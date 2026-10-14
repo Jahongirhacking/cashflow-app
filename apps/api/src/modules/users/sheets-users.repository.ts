@@ -1,8 +1,8 @@
 import { Logger } from '@nestjs/common';
 import { generateId, type User } from '@finance/shared';
-import { TtlCache } from '../../common/cache/ttl-cache';
-import { a1 } from '../google-sheets/a1';
-import type { CellValue, SheetsClient } from '../google-sheets/sheets-client';
+import { TtlCache } from '@finance/shared';
+import { a1 } from '@finance/shared';
+import type { CellValue, SheetsClient } from '@finance/shared';
 import { type NewUser, type UserPatch, UsersRepository } from './users.repository';
 
 const USERS_SHEET = 'Users';

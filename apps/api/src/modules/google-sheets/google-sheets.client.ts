@@ -8,8 +8,8 @@ import {
   type SheetProperties,
   type SpreadsheetMeta,
   type ValueUpdate,
-} from './sheets-client';
-import { describeGoogleError, isRetryableGoogleError, mapGoogleError } from './sheets-errors';
+} from '@finance/shared';
+import { describeGoogleError, isRetryableGoogleError, mapGoogleError } from '@finance/shared';
 
 const BASE_URL = 'https://sheets.googleapis.com/v4/spreadsheets';
 const SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];

@@ -7,7 +7,7 @@ import {
   type InvestmentType,
   investmentTypeForCategory,
   type Transaction,
-} from '@finance/shared';
+} from '../../core';
 
 /** Last `count` months ending at `today` (YYYY-MM-DD), oldest first. */
 export function recentMonths(today: string, count: number): string[] {

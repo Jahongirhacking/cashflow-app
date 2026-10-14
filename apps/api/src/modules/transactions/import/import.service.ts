@@ -10,12 +10,12 @@ import {
   type Transaction,
   type User,
 } from '@finance/shared';
-import { SheetsClient } from '../../google-sheets/sheets-client';
-import { SettingsStore } from '../../spreadsheets/settings-store';
+import { SheetsClient } from '@finance/shared';
+import { SettingsStore } from '@finance/shared';
 import { AppException } from '../../../common/errors/app.exception';
-import { CategoriesRepository } from '../../categories/categories.repository';
-import { SpreadsheetService } from '../../spreadsheets/spreadsheet.service';
-import { TransactionsRepository } from '../transactions.repository';
+import { CategoriesRepository } from '@finance/shared';
+import { SpreadsheetService } from '@finance/shared';
+import { TransactionsRepository } from '@finance/shared';
 import { parseTransactionsWorkbook } from './xlsx-parser';
 
 const FIXED_CATEGORY = /kommunal|qarz|kredit|credit|loan|rent|ijara|obuna|subscri/i;

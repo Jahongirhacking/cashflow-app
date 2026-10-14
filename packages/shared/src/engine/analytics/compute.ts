@@ -13,7 +13,7 @@ import {
   diffDays,
   shiftMonthKey,
   type FixedVariableBreakdown,
-} from '@finance/shared';
+} from '../../core';
 
 /** Pure analytics over the normalised transaction list. Everything here is unit-testable. */
 

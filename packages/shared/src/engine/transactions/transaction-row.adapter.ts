@@ -1,4 +1,4 @@
-import { fromSignedAmount, toSignedAmount, type Transaction } from '@finance/shared';
+import { fromSignedAmount, toSignedAmount, type Transaction } from '../../core';
 import type { CellValue } from '../google-sheets/sheets-client';
 import type { TransactionsLayout } from '../spreadsheets/sheet-layout';
 import {

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/require-await -- test double mirrors the async interface */
-import { AppException } from '../../common/errors/app.exception';
+import { AppError } from '../errors/app-error';
 import { parseA1 } from './a1';
 import {
   type CellValue,
@@ -116,7 +116,7 @@ export class InMemorySheetsClient extends SheetsClient {
     this.calls.push(`addSheet ${title}`);
     const ss = this.open(spreadsheetId);
     if (ss.sheets.some((s) => s.title === title)) {
-      throw new AppException('GOOGLE_API_ERROR', `A sheet named "${title}" already exists.`);
+      throw new AppError('GOOGLE_API_ERROR', `A sheet named "${title}" already exists.`);
     }
     const sheet: MemorySheet = {
       sheetId: this.nextSheetId++,
@@ -133,7 +133,7 @@ export class InMemorySheetsClient extends SheetsClient {
     this.calls.push(`appendRows ${sheetId} ${count}`);
     const ss = this.open(spreadsheetId);
     const sheet = ss.sheets.find((x) => x.sheetId === sheetId);
-    if (!sheet) throw new AppException('GOOGLE_API_ERROR', `No sheet with id ${sheetId}.`);
+    if (!sheet) throw new AppError('GOOGLE_API_ERROR', `No sheet with id ${sheetId}.`);
     sheet.rowCount += Math.max(0, count);
     return;
   }
@@ -147,23 +147,23 @@ export class InMemorySheetsClient extends SheetsClient {
     this.calls.push(`deleteRows ${sheetId} ${startRow}-${endRow}`);
     const ss = this.open(spreadsheetId);
     const sheet = ss.sheets.find((s) => s.sheetId === sheetId);
-    if (!sheet) throw new AppException('GOOGLE_API_ERROR', 'Unknown sheet id');
+    if (!sheet) throw new AppError('GOOGLE_API_ERROR', 'Unknown sheet id');
     sheet.grid.splice(startRow - 1, endRow - startRow + 1);
     return;
   }
 
   private open(spreadsheetId: string): MemorySpreadsheet {
     const ss = this.spreadsheets.get(spreadsheetId);
-    if (!ss) throw new AppException('SPREADSHEET_NOT_FOUND', SPREADSHEET_NOT_FOUND_MESSAGE);
+    if (!ss) throw new AppError('SPREADSHEET_NOT_FOUND', SPREADSHEET_NOT_FOUND_MESSAGE);
     if (ss.accessDenied)
-      throw new AppException('SPREADSHEET_ACCESS_DENIED', SPREADSHEET_ACCESS_DENIED_MESSAGE);
+      throw new AppError('SPREADSHEET_ACCESS_DENIED', SPREADSHEET_ACCESS_DENIED_MESSAGE);
     return ss;
   }
 
   private sheet(spreadsheetId: string, title: string): MemorySheet {
     const ss = this.open(spreadsheetId);
     const sheet = ss.sheets.find((s) => s.title === title);
-    if (!sheet) throw new AppException('GOOGLE_API_ERROR', `Unable to parse range: ${title}`);
+    if (!sheet) throw new AppError('GOOGLE_API_ERROR', `Unable to parse range: ${title}`);
     return sheet;
   }
 
@@ -200,7 +200,7 @@ export class InMemorySheetsClient extends SheetsClient {
     const s = this.sheet(spreadsheetId, sheet);
     const firstRow = (startRow ?? 1) - 1;
     if (firstRow + values.length > s.rowCount) {
-      throw new AppException(
+      throw new AppError(
         'GOOGLE_API_ERROR',
         `Invalid data: Range (${range}) exceeds grid limits. Max rows: ${s.rowCount}, max columns: ${s.columnCount}`,
       );

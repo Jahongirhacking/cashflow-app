@@ -19,7 +19,7 @@ describe('ZodValidationPipe', () => {
       expect(error).toBeInstanceOf(AppException);
       const appError = error as AppException;
       expect(appError.code).toBe('VALIDATION_ERROR');
-      expect(appError.getStatus()).toBe(400);
+      expect(appError.statusCode).toBe(400);
       expect(appError.details?.map((d) => d.path)).toEqual(['amount', 'name']);
     }
   });

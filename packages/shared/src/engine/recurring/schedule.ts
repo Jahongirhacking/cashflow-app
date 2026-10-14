@@ -6,7 +6,7 @@ import {
   type RecurringRule,
   toIsoDate,
   type Transaction,
-} from '@finance/shared';
+} from '../../core';
 
 function pad(n: number): string {
   return n < 10 ? `0${n}` : String(n);

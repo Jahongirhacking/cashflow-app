@@ -14,8 +14,8 @@ import { AppModule } from '../src/app.module';
 import { HttpExceptionFilter } from '../src/common/filters/http-exception.filter';
 import { AppConfigService } from '../src/config/app-config.service';
 import { AuthService } from '../src/modules/auth/auth.service';
-import { InMemorySheetsClient } from '../src/modules/google-sheets/in-memory-sheets.client';
-import { SheetsClient } from '../src/modules/google-sheets/sheets-client';
+import { InMemorySheetsClient } from '@finance/shared';
+import { SheetsClient } from '@finance/shared';
 import { UsersService } from '../src/modules/users/users.service';
 
 const SHEET_ID = '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms';

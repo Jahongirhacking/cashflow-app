@@ -1,4 +1,3 @@
-import { Injectable } from '@nestjs/common';
 import {
   type CreateRecurringRuleInput,
   generateId,
@@ -7,18 +6,17 @@ import {
   todayIsoDate,
   type UpdateRecurringRuleInput,
   type User,
-} from '@finance/shared';
-import { AppException } from '../../common/errors/app.exception';
-import { SheetsClient } from '../google-sheets/sheets-client';
+} from '../../core';
+import { AppError } from '../errors/app-error';
+import { type SheetsClient } from '../google-sheets/sheets-client';
 import { SettingsStore } from '../spreadsheets/settings-store';
-import { SpreadsheetService } from '../spreadsheets/spreadsheet.service';
-import { TransactionsService } from '../transactions/transactions.service';
-import { RecurringRepository } from './recurring.repository';
+import { type SpreadsheetService } from '../spreadsheets/spreadsheet.service';
+import { type TransactionsService } from '../transactions/transactions.service';
+import { type RecurringRepository } from './recurring.repository';
 import { buildSchedule, nextOccurrence, occurrenceKey } from './schedule';
 
 const doneKey = (month: string) => `reminders.done.${month}`;
 
-@Injectable()
 export class RecurringService {
   constructor(
     private readonly spreadsheets: SpreadsheetService,
@@ -96,7 +94,7 @@ export class RecurringService {
   async update(user: User, id: string, patch: UpdateRecurringRuleInput): Promise<RecurringRule> {
     const ctx = await this.spreadsheets.getContext(user);
     const existing = (await this.repo.list(ctx, user.id)).find((r) => r.id === id);
-    if (!existing) throw AppException.notFound('Recurring rule');
+    if (!existing) throw AppError.notFound('Recurring rule');
     const updated: RecurringRule = {
       ...existing,
       ...Object.fromEntries(Object.entries(patch).filter(([, v]) => v !== undefined)),
@@ -128,7 +126,7 @@ export class RecurringService {
   ): Promise<RecurringSchedule> {
     const ctx = await this.spreadsheets.getContext(user);
     const rule = (await this.repo.list(ctx, user.id)).find((r) => r.id === ruleId);
-    if (!rule) throw AppException.notFound('Recurring rule');
+    if (!rule) throw AppError.notFound('Recurring rule');
     const month = dueDate.slice(0, 7);
     const settings = new SettingsStore(this.sheets, ctx.spreadsheetId);
     const current = await this.readDone(settings, month);
@@ -155,7 +153,7 @@ export class RecurringService {
 
 function validateRule(rule: RecurringRule): void {
   if (rule.frequency === 'WEEKLY' && rule.dayOfPeriod !== null && rule.dayOfPeriod > 6) {
-    throw AppException.validation([
+    throw AppError.validation([
       { path: 'dayOfPeriod', message: 'Weekday must be between 0 (Sunday) and 6 (Saturday)' },
     ]);
   }
@@ -163,12 +161,12 @@ function validateRule(rule: RecurringRule): void {
     (rule.frequency === 'MONTHLY' || rule.frequency === 'YEARLY') &&
     (rule.dayOfPeriod === null || rule.dayOfPeriod < 1)
   ) {
-    throw AppException.validation([
+    throw AppError.validation([
       { path: 'dayOfPeriod', message: 'Day of month must be between 1 and 31' },
     ]);
   }
   if (rule.endDate && rule.endDate < rule.startDate) {
-    throw AppException.validation([
+    throw AppError.validation([
       { path: 'endDate', message: 'End date must be after the start date' },
     ]);
   }

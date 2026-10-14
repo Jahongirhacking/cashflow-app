@@ -1,13 +1,13 @@
 import { IMPORT_LAYOUT, type ImportRow, type ImportWarning } from '@finance/shared';
 import ExcelJS from 'exceljs';
-import type { CellValue } from '../../google-sheets/sheets-client';
+import type { CellValue } from '@finance/shared';
 import {
   cellText,
   parseCellAmount,
   parseCellDate,
   parseCellPayment,
   parseCellTime,
-} from '../cell-parsers';
+} from '@finance/shared';
 
 export interface ParsedWorkbook {
   sheetName: string;

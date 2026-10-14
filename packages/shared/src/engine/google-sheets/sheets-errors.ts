@@ -1,4 +1,4 @@
-import { AppException } from '../../common/errors/app.exception';
+import { AppError } from '../errors/app-error';
 
 export const SPREADSHEET_ACCESS_DENIED_MESSAGE =
   'The My Cashify app cannot access this spreadsheet.';
@@ -58,23 +58,23 @@ export function describeGoogleError(error: unknown): string {
 }
 
 /** Translate a Google API failure into a stable application error. */
-export function mapGoogleError(error: unknown): AppException {
-  if (error instanceof AppException) return error;
+export function mapGoogleError(error: unknown): AppError {
+  if (error instanceof AppError) return error;
   const status = googleErrorStatus(error);
   if (isSheetsApiDisabledError(error)) {
-    return new AppException('CONFIGURATION_ERROR', SHEETS_API_DISABLED_MESSAGE, { cause: error });
+    return new AppError('CONFIGURATION_ERROR', SHEETS_API_DISABLED_MESSAGE, { cause: error });
   }
   switch (status) {
     case 403:
-      return new AppException('SPREADSHEET_ACCESS_DENIED', SPREADSHEET_ACCESS_DENIED_MESSAGE, {
+      return new AppError('SPREADSHEET_ACCESS_DENIED', SPREADSHEET_ACCESS_DENIED_MESSAGE, {
         cause: error,
       });
     case 404:
-      return new AppException('SPREADSHEET_NOT_FOUND', SPREADSHEET_NOT_FOUND_MESSAGE, {
+      return new AppError('SPREADSHEET_NOT_FOUND', SPREADSHEET_NOT_FOUND_MESSAGE, {
         cause: error,
       });
     case 429:
-      return new AppException(
+      return new AppError(
         'RATE_LIMITED',
         'Google Sheets is rate limiting requests. Please try again shortly.',
         {
@@ -85,10 +85,10 @@ export function mapGoogleError(error: unknown): AppException {
       const message =
         (error as GoogleErrorLike).response?.data?.error?.message ??
         'Google Sheets rejected the request.';
-      return new AppException('GOOGLE_API_ERROR', message, { cause: error });
+      return new AppError('GOOGLE_API_ERROR', message, { cause: error });
     }
     default:
-      return new AppException(
+      return new AppError(
         'GOOGLE_API_ERROR',
         'Google Sheets is not responding. Please try again.',
         {

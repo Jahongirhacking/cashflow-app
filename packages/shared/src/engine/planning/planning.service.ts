@@ -1,10 +1,8 @@
-import { Injectable } from '@nestjs/common';
-import { type MonthPlan, todayIsoDate, type User } from '@finance/shared';
-import { AnalyticsService } from '../analytics/analytics.service';
-import { RecurringService } from '../recurring/recurring.service';
+import { type MonthPlan, todayIsoDate, type User } from '../../core';
+import { type AnalyticsService } from '../analytics/analytics.service';
+import { type RecurringService } from '../recurring/recurring.service';
 import { buildMonthPlan } from './plan';
 
-@Injectable()
 export class PlanningService {
   constructor(
     private readonly analytics: AnalyticsService,

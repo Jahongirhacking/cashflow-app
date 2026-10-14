@@ -1,9 +1,8 @@
-import { Injectable } from '@nestjs/common';
-import type { Category } from '@finance/shared';
-import { TtlCache } from '../../common/cache/ttl-cache';
-import { AppException } from '../../common/errors/app.exception';
+import type { Category } from '../../core';
+import { TtlCache } from '../cache/ttl-cache';
+import { AppError } from '../errors/app-error';
 import { a1 } from '../google-sheets/a1';
-import { type CellValue, SheetsClient } from '../google-sheets/sheets-client';
+import { type CellValue, type SheetsClient } from '../google-sheets/sheets-client';
 import { CATEGORIES_HEADERS } from '../spreadsheets/sheet-layout';
 import type { SpreadsheetContext } from '../spreadsheets/spreadsheet-context';
 
@@ -18,7 +17,6 @@ interface CategoryTable {
 }
 
 /** Categories live in the app-created "Categories" sheet (ID | Name | Type | Kind | Icon | Color | Default | …). */
-@Injectable()
 export class CategoriesRepository {
   private readonly cache = new TtlCache();
 
@@ -41,7 +39,7 @@ export class CategoriesRepository {
   async update(ctx: SpreadsheetContext, category: Category): Promise<Category> {
     const table = await this.table(ctx, category.userId);
     const row = table.rowById.get(category.id);
-    if (!row) throw AppException.notFound('Category');
+    if (!row) throw AppError.notFound('Category');
     await this.client.updateValues(ctx.spreadsheetId, a1(SHEET, 1, row, WIDTH, row), [
       toCells(category),
     ]);
@@ -52,9 +50,9 @@ export class CategoriesRepository {
   async remove(ctx: SpreadsheetContext, userId: string, id: string): Promise<void> {
     const table = await this.table(ctx, userId);
     const row = table.rowById.get(id);
-    if (!row) throw AppException.notFound('Category');
+    if (!row) throw AppError.notFound('Category');
     const sheet = ctx.sheets.get(SHEET);
-    if (!sheet) throw new AppException('GOOGLE_API_ERROR', 'Categories sheet is missing');
+    if (!sheet) throw new AppError('GOOGLE_API_ERROR', 'Categories sheet is missing');
     await this.client.deleteRows(ctx.spreadsheetId, sheet.sheetId, row, row);
     this.cache.invalidate(this.key(ctx));
   }

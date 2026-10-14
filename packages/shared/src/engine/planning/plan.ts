@@ -9,7 +9,7 @@ import {
   type Transaction,
   type VariableBudgetLine,
   isInvestmentTransaction,
-} from '@finance/shared';
+} from '../../core';
 
 export interface PlanInput {
   month: string;

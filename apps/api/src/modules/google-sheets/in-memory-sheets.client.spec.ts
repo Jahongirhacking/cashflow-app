@@ -1,5 +1,5 @@
 import { AppException } from '../../common/errors/app.exception';
-import { InMemorySheetsClient } from './in-memory-sheets.client';
+import { InMemorySheetsClient } from '@finance/shared';
 
 describe('InMemorySheetsClient', () => {
   let client: InMemorySheetsClient;

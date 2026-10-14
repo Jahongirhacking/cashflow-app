@@ -1,5 +1,5 @@
 import type { RecurringOccurrence, Transaction } from '@finance/shared';
-import { buildMonthPlan } from './plan';
+import { buildMonthPlan } from '@finance/shared';
 
 let n = 0;
 function tx(p: Partial<Transaction>): Transaction {

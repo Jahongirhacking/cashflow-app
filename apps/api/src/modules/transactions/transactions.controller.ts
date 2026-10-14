@@ -16,7 +16,7 @@ import {
 } from '@finance/shared';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { TransactionsService } from './transactions.service';
+import { TransactionsService } from '@finance/shared';
 
 @Controller('transactions')
 export class TransactionsController {

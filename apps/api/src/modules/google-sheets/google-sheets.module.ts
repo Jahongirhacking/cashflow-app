@@ -1,9 +1,9 @@
 import { Global, Logger, Module } from '@nestjs/common';
 import { AppConfigService } from '../../config/app-config.service';
-import { DEMO_SPREADSHEET_URL, seedDemoSpreadsheet } from './demo-spreadsheet';
+import { DEMO_SPREADSHEET_URL, seedDemoSpreadsheet } from '@finance/shared';
 import { GoogleSheetsClient } from './google-sheets.client';
-import { InMemorySheetsClient } from './in-memory-sheets.client';
-import { SheetsClient } from './sheets-client';
+import { InMemorySheetsClient } from '@finance/shared';
+import { SheetsClient } from '@finance/shared';
 
 @Global()
 @Module({

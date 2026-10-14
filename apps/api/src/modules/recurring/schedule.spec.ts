@@ -1,5 +1,5 @@
 import type { RecurringRule, Transaction } from '@finance/shared';
-import { buildSchedule, nextOccurrence, occurrenceKey, occurrencesInMonth } from './schedule';
+import { buildSchedule, nextOccurrence, occurrenceKey, occurrencesInMonth } from '@finance/shared';
 
 const base: RecurringRule = {
   id: 'rec_1',

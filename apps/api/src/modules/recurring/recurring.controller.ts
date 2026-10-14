@@ -14,7 +14,7 @@ import {
 import { z } from 'zod';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { RecurringService } from './recurring.service';
+import { RecurringService } from '@finance/shared';
 
 const monthQuerySchema = z.object({
   month: z

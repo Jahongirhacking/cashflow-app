@@ -1,5 +1,5 @@
 import type { Transaction } from '@finance/shared';
-import { buildInvestmentsOverview, recentMonths } from './compute';
+import { buildInvestmentsOverview, recentMonths } from '@finance/shared';
 
 function tx(
   partial: Partial<Transaction> & Pick<Transaction, 'amount' | 'type' | 'category' | 'date'>,

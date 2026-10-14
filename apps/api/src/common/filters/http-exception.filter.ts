@@ -51,7 +51,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
   private toResponse(exception: unknown): ApiErrorResponse {
     if (exception instanceof AppException) {
       return {
-        statusCode: exception.getStatus(),
+        statusCode: exception.statusCode,
         code: exception.code,
         message: exception.message,
         ...(exception.details ? { details: exception.details } : {}),
