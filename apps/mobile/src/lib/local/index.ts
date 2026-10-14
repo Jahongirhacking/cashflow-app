@@ -5,16 +5,8 @@ import {
   type LocalUserStore,
   type User,
 } from '@finance/shared';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { googleDirect } from '@/features/auth/google-direct';
-
-const CONNECTION_KEY = 'finance.local.connection';
-
-interface StoredConnection {
-  spreadsheetId: string;
-  spreadsheetName: string;
-  verifiedAt: string;
-}
+import { connectionStore } from '@/features/spreadsheet/connection-store';
 
 /**
  * The signed-in Google account plus the connected spreadsheet, kept on the device. This replaces the
@@ -24,13 +16,7 @@ const localUsers: LocalUserStore = {
   async current(): Promise<User | null> {
     const profile = await googleDirect.getProfile();
     if (!profile || !(await googleDirect.hasSession())) return null;
-    let connection: StoredConnection | null = null;
-    try {
-      const raw = await AsyncStorage.getItem(CONNECTION_KEY);
-      connection = raw ? (JSON.parse(raw) as StoredConnection) : null;
-    } catch {
-      connection = null;
-    }
+    const connection = await connectionStore.load();
     return {
       id: `usr_${profile.googleId}`,
       googleId: profile.googleId,
@@ -45,7 +31,7 @@ const localUsers: LocalUserStore = {
     };
   },
   async setSpreadsheet(_userId, connection) {
-    await AsyncStorage.setItem(CONNECTION_KEY, JSON.stringify(connection));
+    await connectionStore.save(connection);
     const user = await this.current();
     if (!user) throw new Error('Not signed in');
     return user;

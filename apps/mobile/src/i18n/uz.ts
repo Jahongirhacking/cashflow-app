@@ -121,6 +121,7 @@ export const uz: Record<TranslationKey, string> = {
 
   'setup.title': 'Jadvalingizni ulang',
   'setup.reconnectTitle': 'Jadvalni qayta ulash',
+  'setup.reconnecting': 'Jadvalingiz qayta ulanmoqda…',
   'setup.signedInAs': '{email} sifatida kirgansiz',
   'setup.step.create': 'Yaratish',
   'setup.step.share': 'Ulashish',

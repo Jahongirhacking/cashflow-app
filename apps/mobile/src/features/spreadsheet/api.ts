@@ -1,6 +1,7 @@
 import type { ConnectSpreadsheetInput, SpreadsheetInfo, SpreadsheetStatus } from '@finance/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/features/auth/AuthProvider';
+import { connectionStore } from '@/features/spreadsheet/connection-store';
 import { api } from '@/lib/api';
 import { queryKeys } from '@/lib/query/keys';
 
@@ -59,7 +60,12 @@ function useApplyStatus() {
         hasSpreadsheet: status.connected,
       });
     }
-    if (status.connected) {
+    if (status.connected && status.spreadsheetId) {
+      void connectionStore.save({
+        spreadsheetId: status.spreadsheetId,
+        spreadsheetName: status.spreadsheetName ?? '',
+        verifiedAt: status.lastVerifiedAt ?? new Date().toISOString(),
+      });
       queryClient.removeQueries({
         predicate: (q) => q.queryKey[0] !== 'auth' && q.queryKey[0] !== 'spreadsheet',
       });

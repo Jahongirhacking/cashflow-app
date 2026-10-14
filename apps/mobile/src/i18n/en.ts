@@ -125,6 +125,7 @@ export const en = {
   // spreadsheet setup
   'setup.title': 'Connect your spreadsheet',
   'setup.reconnectTitle': 'Reconnect your spreadsheet',
+  'setup.reconnecting': 'Reconnecting your spreadsheet…',
   'setup.signedInAs': 'Signed in as {email}',
   'setup.step.create': 'Create',
   'setup.step.share': 'Share',
