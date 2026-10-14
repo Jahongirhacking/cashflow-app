@@ -130,6 +130,11 @@ The Expo project lives in `apps/mobile`, and EAS must run with that folder as th
 - Profiles are in `apps/mobile/eas.json` (`preview` = installable APK, `production` = Play Store AAB). Set
   `EXPO_PUBLIC_API_URL` per profile (or as an EAS environment variable) to the public API origin; it is inlined
   into the bundle at build time, exactly as for the web export.
+- APK size: `preview`/`development` APKs are built for the two phone CPU types only (`gradleCommand` with
+  `-PreactNativeArchitectures=arm64-v8a,armeabi-v7a`) and with R8 code/resource shrinking (`expo-build-properties`
+  in `app.json`), which brings a universal unminified 108 MB APK down to roughly 45 MB. The `production` app bundle
+  keeps every ABI; Google Play serves each device only its own (≈25 MB install). To inspect an artifact:
+  `unzip -l app.apk | awk 'NR>3 && $4 {split($4,p,"/"); s[p[1]"/"p[2]]+=$1} END {for (k in s) printf "%.1f MB %s\n", s[k]/1048576, k}' | sort -rn`.
 - The sign-in deep link uses the `finance` scheme (`apps/mobile/app.json`), which must match `AUTH_NATIVE_SCHEME`
   on the API.
 
