@@ -806,8 +806,8 @@ describe('Spreadsheets & transactions (e2e, in-memory Sheets)', () => {
     await wb.xlsx.load(res.body as Buffer as unknown as ArrayBuffer);
     const ws = wb.worksheets[0];
     const categoriesInFile = new Set<string>();
-    for (let r = 3; r <= (ws?.rowCount ?? 0); r += 1)
-      categoriesInFile.add(String(ws?.getRow(r).getCell(6).value));
+    for (let r = 3; r <= (ws?.rowCount ?? 0); r += 1) const cell = ws?.getRow(r).getCell(6).value;
+    categoriesInFile.add(typeof cell === 'string' ? cell : JSON.stringify(cell));
     expect(categoriesInFile.has('Oziq-ovqat')).toBe(true);
     expect(categoriesInFile.has('Food')).toBe(false);
     expect(categoriesInFile.has('Ovqat')).toBe(false);
