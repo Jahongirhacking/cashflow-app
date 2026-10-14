@@ -20,7 +20,7 @@
     "clean": "rm -rf dist",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint .",
-    "test": "node --test --import tsx tests/**/*.test.ts"
+    "test": "node --test --import tsx \"tests/**/*.test.ts\""
   },
   "dependencies": {
     "zod": "^4.6.5"

@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { env } from '@/lib/env';
 import { Screen } from '@/components/ui/Screen';
 import { Text } from '@/components/ui/Text';
 import { useAuth } from '@/features/auth/AuthProvider';
@@ -74,10 +75,18 @@ export default function SettingsScreen() {
       <SpreadsheetSettingsCard />
 
       <SectionLabel style={{ marginTop: theme.spacing.xl }}>{t('settings.data')}</SectionLabel>
-      <View style={{ gap: theme.spacing.md }}>
-        <ExportCard />
-        <ImportCard />
-      </View>
+      {env.dataMode === 'direct' ? (
+        <Card>
+          <Text variant="caption" color="textSecondary">
+            {t('settings.offlineData')}
+          </Text>
+        </Card>
+      ) : (
+        <View style={{ gap: theme.spacing.md }}>
+          <ExportCard />
+          <ImportCard />
+        </View>
+      )}
 
       <SectionLabel style={{ marginTop: theme.spacing.xl }}>
         {t('settings.appearance')}

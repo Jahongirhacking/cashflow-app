@@ -56,20 +56,48 @@ function normalise(url: string): string {
   return trimmed;
 }
 
+/** Android OAuth client id for direct Google access (public by design; it is not a secret). */
+function readGoogleClientId(): string | null {
+  const value: unknown = process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID;
+  return typeof value === 'string' && value.trim() ? value.trim() : null;
+}
+
+/**
+ * `direct`: the app signs in with Google itself and talks to the Sheets API from the device (no
+ * backend). `api`: everything goes through the NestJS API. Default: direct on native when an OAuth
+ * client id is configured, api otherwise (the web build keeps using the API for now).
+ */
+function readDataMode(googleClientId: string | null): 'direct' | 'api' {
+  const value: unknown = process.env.EXPO_PUBLIC_DATA_MODE;
+  if (value === 'direct' || value === 'api') return value;
+  return googleClientId && Platform.OS !== 'web' ? 'direct' : 'api';
+}
+
 const envSchema = z.object({
   apiUrl: z.url(),
+  googleClientId: z.string().nullable(),
+  dataMode: z.enum(['direct', 'api']),
 });
 
 export type ClientEnv = z.infer<typeof envSchema>;
 
 function loadEnv(): ClientEnv {
-  const candidate = { apiUrl: resolveApiUrl() };
+  const googleClientId = readGoogleClientId();
+  const candidate = {
+    apiUrl: resolveApiUrl(),
+    googleClientId,
+    dataMode: readDataMode(googleClientId),
+  };
   const parsed = envSchema.safeParse(candidate);
   if (parsed.success) return parsed.data;
   console.error(
     `[env] EXPO_PUBLIC_API_URL is not a valid URL ("${candidate.apiUrl}"); falling back to http://localhost:${DEFAULT_API_PORT}. Set it to an absolute URL (https://api.example.com) when exporting the web build.`,
   );
-  return { apiUrl: `http://localhost:${DEFAULT_API_PORT}` };
+  return {
+    apiUrl: `http://localhost:${DEFAULT_API_PORT}`,
+    googleClientId,
+    dataMode: readDataMode(googleClientId),
+  };
 }
 
 export const env: ClientEnv = loadEnv();

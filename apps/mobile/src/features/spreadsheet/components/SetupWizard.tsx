@@ -17,6 +17,7 @@ import { useConnectSpreadsheet, useSpreadsheetStatus } from '@/features/spreadsh
 import { useSpreadsheetAccess } from '@/features/spreadsheet/SpreadsheetAccessProvider';
 import { ApiError, getUserMessage } from '@/lib/api';
 import { useT } from '@/i18n';
+import { env } from '@/lib/env';
 import { useTheme } from '@/theme';
 
 const STEP_KEYS = [
@@ -53,6 +54,7 @@ export function SetupWizard({ reconnect }: { reconnect: boolean }) {
       {step === 1 ? (
         <ShareStep
           email={serviceEmail}
+          direct={env.dataMode === 'direct'}
           loading={status.isPending}
           onNext={() => setStep(2)}
           onBack={() => setStep(0)}
@@ -157,11 +159,14 @@ function CreateStep({ onNext }: { onNext: () => void }) {
 
 function ShareStep({
   email,
+  direct,
   loading,
   onNext,
   onBack,
 }: {
   email: string | null;
+  /** The app reads the sheet with the user's own Google account: nothing to share. */
+  direct: boolean;
   loading: boolean;
   onNext: () => void;
   onBack: () => void;
@@ -169,6 +174,17 @@ function ShareStep({
   const theme = useTheme();
   const t = useT();
   const toast = useToast();
+  if (direct) {
+    return (
+      <StepCard title={t('setup.share.title')}>
+        <Text color="textSecondary">{t('setup.share.direct')}</Text>
+        <View style={styles.actions}>
+          <Button title={t('common.back')} variant="ghost" onPress={onBack} />
+          <Button title={t('common.next')} onPress={onNext} />
+        </View>
+      </StepCard>
+    );
+  }
   const copy = async () => {
     if (!email) return;
     await Clipboard.setStringAsync(email);

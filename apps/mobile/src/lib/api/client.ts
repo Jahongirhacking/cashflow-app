@@ -1,6 +1,7 @@
-import { isApiErrorResponse } from '@finance/shared';
+import { AppError, isApiErrorResponse } from '@finance/shared';
 import { Platform } from 'react-native';
 import { env } from '@/lib/env';
+import { localRequest } from '@/lib/local';
 import { ApiError } from './errors';
 
 type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
@@ -64,6 +65,7 @@ export async function apiRequest<TResponse>(
   options: RequestOptions = {},
 ): Promise<TResponse> {
   const { method = 'GET', body, query, signal, timeoutMs = 20_000 } = options;
+  if (env.dataMode === 'direct') return localApiRequest<TResponse>(path, method, query, body);
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
   const abortFromCaller = () => controller.abort();
@@ -193,3 +195,23 @@ export const api = {
   delete: <T>(path: string) => apiRequest<T>(path, { method: 'DELETE' }),
   upload: apiUpload,
 };
+
+/** Direct mode: the same call, answered by the on-device engine; AppError becomes ApiError. */
+async function localApiRequest<TResponse>(
+  path: string,
+  method: HttpMethod,
+  query: QueryParams | undefined,
+  body: unknown,
+): Promise<TResponse> {
+  try {
+    return await localRequest<TResponse>({ method, path: path.split('?')[0] ?? path, query, body });
+  } catch (error) {
+    if (error instanceof AppError) {
+      if (error.code === 'UNAUTHORIZED') unauthorizedHandler();
+      throw notifyError(new ApiError(error.code, error.message, error.statusCode, error.details));
+    }
+    throw notifyError(
+      new ApiError('INTERNAL_ERROR', error instanceof Error ? error.message : 'Unexpected error'),
+    );
+  }
+}

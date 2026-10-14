@@ -146,6 +146,13 @@ packages/shared/src
   domain/        models + Zod schemas     api/  error envelope, health     utils/  money, date, id
 ```
 
+## Architecture note: where the spreadsheet logic runs
+
+All spreadsheet logic (layout/initialisation, transactions, categories, recurring, analytics, planning,
+investments) lives in `packages/shared/src/engine` behind an abstract `SheetsClient`. The NestJS API hosts it
+with a service-account client; the Android app can host it itself with the user's OAuth token (direct mode,
+see DEPLOY.md), so the phone works without any backend.
+
 ## Deployment
 
 See [DEPLOY.md](DEPLOY.md): Dockerfile + compose for the API, environment reference, and Northflank steps.

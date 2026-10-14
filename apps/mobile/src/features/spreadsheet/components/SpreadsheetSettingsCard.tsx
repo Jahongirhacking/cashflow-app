@@ -6,6 +6,7 @@ import { Text } from '@/components/ui/Text';
 import { useSpreadsheetStatus, useVerifySpreadsheet } from '@/features/spreadsheet/api';
 import { useSpreadsheetAccess } from '@/features/spreadsheet/SpreadsheetAccessProvider';
 import { useT } from '@/i18n';
+import { env } from '@/lib/env';
 import { useTheme } from '@/theme';
 import * as Linking from 'expo-linking';
 import { useRouter } from 'expo-router';
@@ -94,7 +95,9 @@ export function SpreadsheetSettingsCard() {
       </Row>
       <Row label={t('sheet.sharedWith')}>
         <Text variant="mono" selectable>
-          {data?.serviceAccountEmail ?? t('sheet.notConfigured')}
+          {env.dataMode === 'direct'
+            ? t('sheet.ownAccount')
+            : (data?.serviceAccountEmail ?? t('sheet.notConfigured'))}
         </Text>
       </Row>
       <View style={[styles.actions, { marginTop: theme.spacing.lg }]}>

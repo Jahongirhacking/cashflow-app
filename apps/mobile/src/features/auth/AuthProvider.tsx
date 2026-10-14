@@ -11,7 +11,9 @@ import {
 } from 'react';
 import { configureApiClient } from '@/lib/api';
 import { queryKeys } from '@/lib/query/keys';
+import { env } from '@/lib/env';
 import { exchangeNativeCode, fetchCurrentUser, logoutRequest } from './api';
+import { googleDirect } from './google-direct';
 import { startGoogleSignIn } from './sign-in';
 import { tokenStore } from './token-store';
 
@@ -86,6 +88,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSignInErrorState(null);
     setBusy(true);
     try {
+      if (env.dataMode === 'direct') {
+        // No server: Google consent (identity + Sheets scope) happens on the device, then the
+        // local engine answers /auth/me from the stored profile.
+        if (!googleDirect.isConfigured()) {
+          setSignInErrorState('not_configured');
+          return;
+        }
+        const profile = await googleDirect.signIn();
+        if (profile) await queryClient.invalidateQueries({ queryKey: queryKeys.auth.me });
+        return;
+      }
       const result = await startGoogleSignIn();
       if (result.kind === 'code') {
         await completeNativeSignIn(result.code);
@@ -97,7 +110,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       setBusy(false);
     }
-  }, [completeNativeSignIn]);
+  }, [completeNativeSignIn, queryClient]);
 
   const signOut = useCallback(async () => {
     try {

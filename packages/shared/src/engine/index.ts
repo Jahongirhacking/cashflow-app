@@ -27,3 +27,5 @@ export * from './transactions/cell-parsers';
 export * from './transactions/transaction-row.adapter';
 export * from './transactions/transactions.repository';
 export * from './transactions/transactions.service';
+export * from './google-sheets/fetch-sheets.client';
+export * from './local-api';

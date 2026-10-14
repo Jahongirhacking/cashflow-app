@@ -12,6 +12,7 @@ export const uz: Record<TranslationKey, string> = {
   'common.close': 'Yopish',
   'common.dismiss': 'Yopish',
   'common.back': 'Orqaga',
+  'common.next': 'Keyingi',
   'common.manage': 'Boshqarish',
   'common.seeAll': 'Barchasi',
   'common.all': 'Barchasi',
@@ -72,6 +73,8 @@ export const uz: Record<TranslationKey, string> = {
   'settings.account': 'Hisob',
   'settings.spreadsheet': 'Jadval',
   'settings.data': "Ma'lumotlar",
+  'settings.offlineData':
+    ".xlsx fayllarni import va eksport qilish server bilan ishlaydigan veb-ilovada mavjud. Bu ilova jadvalingiz bilan to'g'ridan-to'g'ri ishlaydi.",
   'settings.appearance': "Ko'rinish",
 
   'auth.tagline': "Google jadvalingiz — zamonaviy moliya ilovasi ko'rinishida.",
@@ -133,6 +136,8 @@ export const uz: Record<TranslationKey, string> = {
   'setup.share.body':
     'Jadvalingizni ushbu e-pochta bilan ulashing va unga Muharrir (Editor) huquqini bering.',
   'setup.share.notConfigured': 'Serverda xizmat hisobi sozlanmagan',
+  'setup.share.direct':
+    "Ulashish shart emas: ilova jadvalni kirishda ruxsat bergan o'z Google hisobingiz orqali o'qiydi va yozadi.",
   'setup.share.copy': 'E-pochtani nusxalash',
   'setup.share.copied': 'E-pochta nusxalandi',
   'setup.share.step1': 'Jadvalingizni oching.',
@@ -167,6 +172,7 @@ export const uz: Record<TranslationKey, string> = {
   'sheet.name': 'Jadval',
   'sheet.lastVerified': 'Oxirgi tekshiruv',
   'sheet.sharedWith': 'Ulashilgan',
+  'sheet.ownAccount': "O'z Google hisobingiz",
   'sheet.notConfigured': 'Sozlanmagan',
   'sheet.open': 'Jadvalni ochish',
   'sheet.reconnect': 'Jadvalni qayta ulash',

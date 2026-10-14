@@ -118,6 +118,32 @@ Set the same value as `GOOGLE_OAUTH_REDIRECT_URI` on the API (or just `API_PUBLI
 A "Missing required parameter: redirect_uri" error from Google means the API was started without either value.
 Android sign-in additionally needs `AUTH_NATIVE_SCHEME=finance` on the API (the app's deep-link scheme).
 
+## Android without a backend (direct mode)
+
+The Android app can run with **no server at all**: it signs the user in with Google on the device (PKCE,
+no client secret) asking for identity plus the `https://www.googleapis.com/auth/spreadsheets` scope, and the
+spreadsheet engine (`packages/shared/src/engine`) runs in-process against the Sheets REST API with the user's
+own token. The screens are unchanged: `apps/mobile/src/lib/local` answers the same `/transactions`,
+`/analytics/...` calls the API would. The connected spreadsheet id is stored on the device; nothing is shared
+with a service account. Import/export of .xlsx stay on the web app (they need the API) for now.
+
+One-time Google Cloud setup (same project as the OAuth consent screen):
+
+1. OAuth consent screen → add the scope `.../auth/spreadsheets`. While the app is in _Testing_, add the Google
+   accounts allowed to sign in (up to 100); otherwise submit the app for verification.
+2. Get the signing certificate fingerprint of the EAS keystore: `cd apps/mobile && eas credentials -p android`
+   → _production_ keystore → copy the **SHA-1**.
+3. Credentials → _Create credentials_ → _OAuth client ID_ → **Android**: package name
+   `com.jahongirhacking.my_cashflowify`, the SHA-1 from step 2. Copy the client id
+   (`…apps.googleusercontent.com`). Android clients have no secret and need no redirect URI entry.
+4. Put the client id in `apps/mobile/eas.json` (`EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID`, it is public) or as an
+   EAS environment variable, and rebuild (`eas build -p android --profile preview`). `app.config.ts` registers
+   Google's redirect scheme (`com.googleusercontent.apps.<id>`) automatically from that variable.
+
+Mode selection: `EXPO_PUBLIC_DATA_MODE=direct|api` overrides the default (direct on native when a client id is
+set, api otherwise). The web build keeps using the API until it gets the same treatment with Google Identity
+Services.
+
 ## Android (EAS Build)
 
 The Expo project lives in `apps/mobile`, and EAS must run with that folder as the project root. If a build logs

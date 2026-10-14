@@ -11,6 +11,7 @@ export const en = {
   'common.close': 'Close',
   'common.dismiss': 'Dismiss',
   'common.back': 'Back',
+  'common.next': 'Next',
   'common.manage': 'Manage',
   'common.seeAll': 'See all',
   'common.all': 'All',
@@ -74,6 +75,8 @@ export const en = {
   'settings.account': 'Account',
   'settings.spreadsheet': 'Spreadsheet',
   'settings.data': 'Data',
+  'settings.offlineData':
+    'Import and export of .xlsx files are available in the web app, which runs with the server. This app talks to your spreadsheet directly.',
   'settings.appearance': 'Appearance',
 
   // auth
@@ -136,6 +139,8 @@ export const en = {
   'setup.share.title': 'Share your spreadsheet',
   'setup.share.body': 'Share your spreadsheet with this email and give it Editor access.',
   'setup.share.notConfigured': 'Service account not configured on the server',
+  'setup.share.direct':
+    'Nothing to share: the app reads and writes the spreadsheet with your own Google account, which you authorised when signing in.',
   'setup.share.copy': 'Copy email',
   'setup.share.copied': 'Email copied',
   'setup.share.step1': 'Open your spreadsheet.',
@@ -171,6 +176,7 @@ export const en = {
   'sheet.name': 'Spreadsheet',
   'sheet.lastVerified': 'Last verified',
   'sheet.sharedWith': 'Shared with',
+  'sheet.ownAccount': 'Your Google account',
   'sheet.notConfigured': 'Not configured',
   'sheet.open': 'Open Spreadsheet',
   'sheet.reconnect': 'Reconnect Spreadsheet',
