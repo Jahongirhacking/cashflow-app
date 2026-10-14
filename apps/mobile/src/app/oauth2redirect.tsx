@@ -1,8 +1,8 @@
-import { useRouter } from 'expo-router';
-import { useEffect } from 'react';
 import { FullScreenLoader } from '@/components/feedback/FullScreenLoader';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { useT } from '@/i18n';
+import { useRouter } from 'expo-router';
+import { useEffect } from 'react';
 
 /**
  * Google's return address for the on-device sign-in is `com.googleusercontent.apps.<id>:/oauth2redirect`.
@@ -19,9 +19,10 @@ export default function OAuthRedirectScreen() {
       router.replace('/');
       return;
     }
-    if (auth.status === 'loading') return;
-    // Not signed in (yet): give the token exchange a moment, then fall back to the login screen.
-    const timer = setTimeout(() => router.replace('/login'), 6000);
+    // Fallback applies to loading as well.
+    const timer = setTimeout(() => {
+      router.replace('/login');
+    }, 10000);
     return () => clearTimeout(timer);
   }, [auth.status, router]);
 
