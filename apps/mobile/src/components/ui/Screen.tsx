@@ -1,8 +1,9 @@
-import type { ReactNode } from 'react';
-import { ScrollView, StyleSheet, View, type ViewStyle } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { breakpoints, useTheme } from '@/theme';
+import { useCallback, useState, type ReactNode } from 'react';
+import { ScrollView, StyleSheet, View, type ViewStyle } from 'react-native';
+import { RefreshControl } from 'react-native-gesture-handler';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Text } from './Text';
 
 export interface ScreenProps {
@@ -13,6 +14,7 @@ export interface ScreenProps {
   children: ReactNode;
   scroll?: boolean;
   contentStyle?: ViewStyle;
+  onRefresh?: () => Promise<void> | void;
 }
 
 /**
@@ -26,18 +28,33 @@ export function Screen({
   children,
   scroll = true,
   contentStyle,
+  onRefresh,
 }: ScreenProps) {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const { isDesktop, isMobile } = useBreakpoint();
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefresh = useCallback(async () => {
+    if (!onRefresh || refreshing) return;
+    setRefreshing(true);
+    try {
+      await onRefresh();
+    } catch (error) {
+      console.error('Screen refresh failed:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [onRefresh, refreshing]);
 
   const horizontalPadding = isMobile ? theme.spacing.lg : theme.spacing.xxl;
+
   const header =
     title || headerRight ? (
       <View style={[styles.header, { marginBottom: theme.spacing.xl }]}>
         <View style={styles.headerText}>
           {title ? (
-            <Text variant={isDesktop ? 'title' : 'title'} accessibilityRole="header">
+            <Text variant="title" accessibilityRole="header">
               {title}
             </Text>
           ) : null}
@@ -80,6 +97,16 @@ export function Screen({
       style={[styles.root, { backgroundColor: theme.colors.background }]}
       contentContainerStyle={styles.scrollContent}
       keyboardShouldPersistTaps="handled"
+      refreshControl={
+        onRefresh ? (
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            colors={[theme.colors.primary]}
+            tintColor={theme.colors.primary}
+          />
+        ) : undefined
+      }
     >
       {content}
     </ScrollView>
